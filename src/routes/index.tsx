@@ -120,8 +120,8 @@ function Home() {
             <Button asChild size="lg" variant="brand">
               <Link to="/courses">Explore Courses <ArrowRight className="h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#community">Join Community</a>
+            <Button size="lg" variant="outline" onClick={() => setPartnerOpen(true)}>
+              <Handshake className="h-4 w-4" /> Partner with us
             </Button>
           </motion.div>
 
