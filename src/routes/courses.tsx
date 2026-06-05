@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { Search, LayoutGrid, List, X, Star, Clock, BarChart3 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, LayoutGrid, List, X, Star, Clock, BarChart3, Loader2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { CourseCard } from "@/components/CourseCard";
+import { CourseCard, type CourseCardData } from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
-import { courses, categories, type Course } from "@/data/courses";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/courses")({
   head: () => ({
@@ -19,19 +19,37 @@ export const Route = createFileRoute("/courses")({
   component: Courses,
 });
 
+type CourseRow = CourseCardData & { featured: boolean };
+
 const levels = ["All", "Beginner", "Intermediate", "Advanced"] as const;
 const sorts = ["Featured", "Top Rated", "Shortest"] as const;
 
 function Courses() {
+  const [data, setData] = useState<CourseRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("All");
   const [level, setLevel] = useState<(typeof levels)[number]>("All");
   const [sort, setSort] = useState<(typeof sorts)[number]>("Featured");
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [active, setActive] = useState<Course | null>(null);
+  const [active, setActive] = useState<CourseRow | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("courses")
+      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,featured")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) setData(data as CourseRow[]);
+        setLoading(false);
+      });
+  }, []);
+
+  const categories = useMemo(() => Array.from(new Set(data.map((c) => c.category))).sort(), [data]);
 
   const list = useMemo(() => {
-    let r = courses.filter((c) => {
+    let r = data.filter((c) => {
       if (cat !== "All" && c.category !== cat) return false;
       if (level !== "All" && c.level !== level) return false;
       if (q && !`${c.title} ${c.description} ${c.instructor}`.toLowerCase().includes(q.toLowerCase())) return false;
@@ -41,7 +59,7 @@ function Courses() {
     if (sort === "Shortest") r = [...r].sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
     if (sort === "Featured") r = [...r].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
     return r;
-  }, [q, cat, level, sort]);
+  }, [data, q, cat, level, sort]);
 
   return (
     <main className="min-h-screen">
@@ -55,7 +73,7 @@ function Courses() {
             Find your <span className="gradient-text">next skill</span>.
           </h1>
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-            {courses.length} expert-led courses across creative-tech, design, code and entrepreneurship.
+            {loading ? "Loading courses…" : `${data.length} expert-led courses across creative-tech, design, code and entrepreneurship.`}
           </p>
 
           <div className="mt-8 max-w-2xl mx-auto relative">
@@ -100,37 +118,43 @@ function Courses() {
 
       <section className="py-16">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <p className="text-sm text-muted-foreground mb-6">{list.length} {list.length === 1 ? "course" : "courses"}</p>
-          {list.length === 0 ? (
-            <div className="text-center py-24 rounded-3xl bg-card border border-border/60">
-              <p className="font-display font-bold text-xl">No courses match those filters</p>
-              <p className="text-muted-foreground mt-2">Try clearing a filter or searching for something else.</p>
-              <Button className="mt-6" variant="outline" onClick={() => { setQ(""); setCat("All"); setLevel("All"); }}>Reset filters</Button>
-            </div>
-          ) : view === "grid" ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {list.map((c) => <CourseCard key={c.id} course={c} onClick={() => setActive(c)} />)}
-            </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-[var(--cyan)]" /></div>
           ) : (
-            <div className="space-y-4">
-              {list.map((c) => (
-                <button key={c.id} onClick={() => setActive(c)} className="w-full flex gap-5 p-4 rounded-2xl bg-card border border-border/60 hover:border-[var(--cyan)]/50 transition text-left">
-                  <img src={c.thumbnail} alt="" className="h-28 w-44 rounded-xl object-cover shrink-0" loading="lazy" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                      <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · <span>{c.level}</span>
-                    </div>
-                    <h3 className="font-display font-bold text-lg">{c.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{c.description}</p>
-                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.duration}</span>
-                      <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-[var(--cyan)] text-[var(--cyan)]" />{c.rating}</span>
-                      <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" />{c.instructor}</span>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <>
+              <p className="text-sm text-muted-foreground mb-6">{list.length} {list.length === 1 ? "course" : "courses"}</p>
+              {list.length === 0 ? (
+                <div className="text-center py-24 rounded-3xl bg-card border border-border/60">
+                  <p className="font-display font-bold text-xl">No courses match those filters</p>
+                  <p className="text-muted-foreground mt-2">Try clearing a filter or searching for something else.</p>
+                  <Button className="mt-6" variant="outline" onClick={() => { setQ(""); setCat("All"); setLevel("All"); }}>Reset filters</Button>
+                </div>
+              ) : view === "grid" ? (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {list.map((c) => <CourseCard key={c.id} course={c} onClick={() => setActive(c)} />)}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {list.map((c) => (
+                    <button key={c.id} onClick={() => setActive(c)} className="w-full flex gap-5 p-4 rounded-2xl bg-card border border-border/60 hover:border-[var(--cyan)]/50 transition text-left">
+                      {c.thumbnail_url && <img src={c.thumbnail_url} alt="" className="h-28 w-44 rounded-xl object-cover shrink-0" loading="lazy" />}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                          <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · <span>{c.level}</span>
+                        </div>
+                        <h3 className="font-display font-bold text-lg">{c.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{c.description}</p>
+                        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.duration}</span>
+                          <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-[var(--cyan)] text-[var(--cyan)]" />{c.rating}</span>
+                          <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" />{c.instructor}</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
@@ -139,7 +163,7 @@ function Courses() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setActive(null)}>
           <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border/60 soft-shadow">
             <button onClick={() => setActive(null)} aria-label="Close" className="absolute top-4 right-4 z-10 h-9 w-9 rounded-full glass flex items-center justify-center"><X className="h-4 w-4" /></button>
-            <img src={active.thumbnail} alt="" className="w-full aspect-[2/1] object-cover" />
+            {active.thumbnail_url && <img src={active.thumbnail_url} alt="" className="w-full aspect-[2/1] object-cover" />}
             <div className="p-7">
               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                 <span className="font-semibold text-[var(--ocean)] uppercase tracking-wider">{active.category}</span> · <span>{active.level}</span> · <span>{active.duration}</span>

@@ -1,11 +1,23 @@
 import { Link } from "@tanstack/react-router";
 import { Github, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 import { Logo } from "./Logo";
+import { NewsletterForm } from "./NewsletterForm";
 
 export function Footer() {
   return (
     <footer className="relative mt-32 border-t border-border/60 bg-gradient-to-b from-background to-secondary/40">
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[var(--cyan)]/60 to-transparent" />
+
+      <div className="mx-auto max-w-7xl px-5 lg:px-8 pt-16">
+        <div className="rounded-3xl gradient-brand p-8 md:p-10 text-white grid md:grid-cols-[1fr_1.2fr] gap-6 items-center">
+          <div>
+            <h3 className="font-display font-extrabold text-2xl md:text-3xl">Stay in the loop</h3>
+            <p className="text-white/85 text-sm mt-1.5">New courses, workshops, and creator stories — straight to your inbox.</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur rounded-2xl p-3"><NewsletterForm /></div>
+        </div>
+      </div>
+
       <div className="mx-auto max-w-7xl px-5 lg:px-8 py-16 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-2 max-w-sm">
           <Logo />
