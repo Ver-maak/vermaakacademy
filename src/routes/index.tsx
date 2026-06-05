@@ -58,9 +58,6 @@ function Home() {
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [enrollFor, setEnrollFor] = useState<CourseCardData | null>(null);
 
-
-function Home() {
-  const [featured, setFeatured] = useState<CourseCardData[]>([]);
   useEffect(() => {
     supabase
       .from("courses")
