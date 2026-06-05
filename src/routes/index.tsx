@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Users, Globe, Award, Rocket, Brain, Palette, Code2, Camera, Megaphone, Gamepad2, Box, Film, Lightbulb } from "lucide-react";
+import { ArrowRight, Sparkles, Users, Globe, Award, Rocket, Brain, Palette, Code2, Camera, Megaphone, Gamepad2, Box, Film, Lightbulb, Handshake } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -7,6 +7,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { CourseCard, type CourseCardData } from "@/components/CourseCard";
 import { Counter } from "@/components/Counter";
+import { PartnerForm } from "@/components/PartnerForm";
+import { EnrollForm } from "@/components/EnrollForm";
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-waves.jpg";
@@ -51,14 +53,11 @@ const whyItems = [
   { icon: Award, title: "Hands-on Projects", desc: "Ship portfolio-grade work, not toy assignments." },
 ];
 
-const testimonials = [
-  { name: "Chidi Eze", role: "Product Designer, Lagos", quote: "Vermaak rewired how I think about craft. The mentorship alone was worth it." },
-  { name: "Aisha Bello", role: "Frontend Dev, Nairobi", quote: "I shipped my first production app in week 6. The community keeps me leveled up." },
-  { name: "Tendai Moyo", role: "Brand Designer, Harare", quote: "Finally a platform that treats African creatives as world-class — because we are." },
-];
-
 function Home() {
   const [featured, setFeatured] = useState<CourseCardData[]>([]);
+  const [partnerOpen, setPartnerOpen] = useState(false);
+  const [enrollFor, setEnrollFor] = useState<CourseCardData | null>(null);
+
   useEffect(() => {
     supabase
       .from("courses")
@@ -121,8 +120,8 @@ function Home() {
             <Button asChild size="lg" variant="brand">
               <Link to="/courses">Explore Courses <ArrowRight className="h-4 w-4" /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#community">Join Community</a>
+            <Button size="lg" variant="outline" onClick={() => setPartnerOpen(true)}>
+              <Handshake className="h-4 w-4" /> Partner with us
             </Button>
           </motion.div>
 
@@ -179,7 +178,7 @@ function Home() {
             <p className="mt-3 text-muted-foreground">Real projects, real mentors, real outcomes.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((c) => <CourseCard key={c.id} course={c} />)}
+            {featured.map((c) => <CourseCard key={c.id} course={c} onClick={() => setEnrollFor(c)} />)}
           </div>
         </div>
       </section>
@@ -232,34 +231,22 @@ function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Partner CTA */}
       <section className="py-24">
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-sm font-semibold text-[var(--ocean)] uppercase tracking-wider mb-2">Voices</p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl">From our community</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.figure
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-7 rounded-3xl bg-card border border-border/60 soft-shadow relative"
-              >
-                <div className="absolute -top-3 left-7 h-7 w-7 rounded-full gradient-brand flex items-center justify-center text-white text-sm font-bold">"</div>
-                <blockquote className="text-foreground/90 leading-relaxed">{t.quote}</blockquote>
-                <figcaption className="mt-5 pt-5 border-t border-border/60">
-                  <p className="font-semibold text-sm">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
-                </figcaption>
-              </motion.figure>
-            ))}
+        <div className="mx-auto max-w-5xl px-5 lg:px-8">
+          <div className="relative overflow-hidden rounded-[2.5rem] p-10 sm:p-14 bg-card border border-border/60 soft-shadow text-center">
+            <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[var(--cyan)]/25 blur-[100px]" />
+            <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[var(--royal)]/25 blur-[100px]" />
+            <div className="relative">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl gradient-brand mb-5"><Handshake className="h-7 w-7 text-white" /></div>
+              <h2 className="font-display font-bold text-3xl sm:text-4xl">Partner with Vermaak Academy</h2>
+              <p className="mt-3 text-muted-foreground max-w-xl mx-auto">Sponsor a cohort, hire our talent, co-create curriculum, or mentor the next wave of African builders.</p>
+              <Button size="lg" variant="brand" className="mt-7" onClick={() => setPartnerOpen(true)}>Partner with us</Button>
+            </div>
           </div>
         </div>
       </section>
+
 
       {/* Partners */}
       <section className="py-16 border-y border-border/60 bg-secondary/30">
@@ -298,6 +285,9 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <PartnerForm open={partnerOpen} onClose={() => setPartnerOpen(false)} />
+      <EnrollForm open={!!enrollFor} onClose={() => setEnrollFor(null)} course={enrollFor ? { id: enrollFor.id, title: enrollFor.title } : null} />
 
       <Footer />
     </main>

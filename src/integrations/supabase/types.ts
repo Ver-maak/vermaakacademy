@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      course_enrollments: {
+        Row: {
+          course_id: string | null
+          course_title: string
+          created_at: string
+          email: string
+          id: string
+          motivation: string
+          name: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          course_id?: string | null
+          course_title?: string
+          created_at?: string
+          email: string
+          id?: string
+          motivation?: string
+          name: string
+          phone?: string
+          status?: string
+        }
+        Update: {
+          course_id?: string | null
+          course_title?: string
+          created_at?: string
+          email?: string
+          id?: string
+          motivation?: string
+          name?: string
+          phone?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           category: string
@@ -80,6 +124,42 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      partner_inquiries: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          organization: string
+          partnership_type: string
+          phone: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message?: string
+          name: string
+          organization?: string
+          partnership_type?: string
+          phone?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          organization?: string
+          partnership_type?: string
+          phone?: string
+          status?: string
         }
         Relationships: []
       }

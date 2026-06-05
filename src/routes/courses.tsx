@@ -4,6 +4,7 @@ import { Search, LayoutGrid, List, X, Star, Clock, BarChart3, Loader2 } from "lu
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CourseCard, type CourseCardData } from "@/components/CourseCard";
+import { EnrollForm } from "@/components/EnrollForm";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -33,6 +34,7 @@ function Courses() {
   const [sort, setSort] = useState<(typeof sorts)[number]>("Featured");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [active, setActive] = useState<CourseRow | null>(null);
+  const [enrollFor, setEnrollFor] = useState<CourseRow | null>(null);
 
   useEffect(() => {
     supabase
@@ -196,12 +198,14 @@ function Courses() {
                   <p className="text-xs text-muted-foreground">Instructor</p>
                   <p className="font-semibold">{active.instructor}</p>
                 </div>
-                <Button size="lg" variant="brand">Enroll Now</Button>
+                <Button size="lg" variant="brand" onClick={() => { setEnrollFor(active); setActive(null); }}>Enroll Now</Button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <EnrollForm open={!!enrollFor} onClose={() => setEnrollFor(null)} course={enrollFor ? { id: enrollFor.id, title: enrollFor.title } : null} />
 
       <Footer />
     </main>

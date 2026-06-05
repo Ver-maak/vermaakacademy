@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — Vermaak Academy" }] }),
+  head: () => ({ meta: [{ title: "Admin — Vermaak Academy" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Admin,
 });
 
@@ -27,6 +27,10 @@ type CourseRow = {
   published: boolean;
 };
 
+type Subscriber = { id: string; email: string; name: string; created_at: string };
+type Partner = { id: string; name: string; organization: string; email: string; phone: string; partnership_type: string; message: string; status: string; created_at: string };
+type Enrollment = { id: string; course_title: string; name: string; email: string; phone: string; motivation: string; status: string; created_at: string };
+
 const emptyForm: Omit<CourseRow, "id"> = {
   title: "",
   description: "",
@@ -40,29 +44,32 @@ const emptyForm: Omit<CourseRow, "id"> = {
   published: true,
 };
 
+type Tab = "courses" | "enrollments" | "partners" | "subscribers";
+
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const [tab, setTab] = useState<Tab>("courses");
   const [courses, setCourses] = useState<CourseRow[]>([]);
-  const [subs, setSubs] = useState<{ id: string; email: string; name: string; created_at: string }[]>([]);
+  const [subs, setSubs] = useState<Subscriber[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [editing, setEditing] = useState<CourseRow | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    if (!loading && user && !isAdmin) {
-      toast.error("Admin access required.");
-    }
-  }, [loading, user, isAdmin]);
-
   async function refresh() {
-    const [{ data: c }, { data: s }] = await Promise.all([
+    const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
       supabase.from("courses").select("*").order("created_at", { ascending: false }),
       supabase.from("newsletter_subscribers").select("id,email,name,created_at").order("created_at", { ascending: false }),
+      supabase.from("partner_inquiries").select("*").order("created_at", { ascending: false }),
+      supabase.from("course_enrollments").select("id,course_title,name,email,phone,motivation,status,created_at").order("created_at", { ascending: false }),
     ]);
     setCourses((c as CourseRow[]) ?? []);
     setSubs(s ?? []);
+    setPartners((p as Partner[]) ?? []);
+    setEnrollments((e as Enrollment[]) ?? []);
   }
 
   useEffect(() => {
@@ -136,6 +143,29 @@ function Admin() {
     refresh();
   }
 
+  async function setPartnerStatus(id: string, status: string) {
+    const { error } = await supabase.from("partner_inquiries").update({ status }).eq("id", id);
+    if (error) return toast.error(error.message);
+    refresh();
+  }
+  async function removePartner(id: string) {
+    if (!confirm("Delete this inquiry?")) return;
+    const { error } = await supabase.from("partner_inquiries").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    refresh();
+  }
+  async function setEnrollStatus(id: string, status: string) {
+    const { error } = await supabase.from("course_enrollments").update({ status }).eq("id", id);
+    if (error) return toast.error(error.message);
+    refresh();
+  }
+  async function removeEnroll(id: string) {
+    if (!confirm("Delete this enrollment?")) return;
+    const { error } = await supabase.from("course_enrollments").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    refresh();
+  }
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
   }
@@ -145,99 +175,205 @@ function Admin() {
       <main className="min-h-screen">
         <Navbar />
         <div className="pt-36 max-w-xl mx-auto px-5 text-center">
-          <h1 className="font-display font-extrabold text-3xl">Admin only</h1>
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-destructive/15 text-destructive mb-5">
+            <ShieldAlert className="h-7 w-7" />
+          </div>
+          <h1 className="font-display font-extrabold text-3xl">403 — Admin access required</h1>
           <p className="mt-3 text-muted-foreground">
-            Your account ({user?.email}) does not have admin access. Ask an admin to grant you the role.
+            Your account ({user?.email}) does not have admin privileges.
           </p>
-          <p className="mt-2 text-xs text-muted-foreground">User ID: <code>{user?.id}</code></p>
-          <Button className="mt-6" variant="brand" onClick={() => navigate({ to: "/" })}>Back home</Button>
+          <div className="mt-6 flex gap-3 justify-center">
+            <Button variant="brand" onClick={() => navigate({ to: "/" })}>Back home</Button>
+            <Button variant="outline" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth" }); }}>Sign out</Button>
+          </div>
         </div>
         <Footer />
       </main>
     );
   }
 
+  const stats = [
+    { label: "Courses", icon: GraduationCap, value: courses.length },
+    { label: "Enrollments", icon: Users, value: enrollments.length },
+    { label: "Partners", icon: Handshake, value: partners.length },
+    { label: "Subscribers", icon: Mail, value: subs.length },
+  ];
+
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "courses", label: `Courses (${courses.length})` },
+    { id: "enrollments", label: `Enrollments (${enrollments.length})` },
+    { id: "partners", label: `Partners (${partners.length})` },
+    { id: "subscribers", label: `Subscribers (${subs.length})` },
+  ];
+
   return (
     <main className="min-h-screen">
       <Navbar />
       <section className="pt-32 pb-16">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
-            <div>
-              <p className="text-sm font-semibold text-[var(--ocean)] uppercase tracking-wider">Admin</p>
-              <h1 className="font-display font-extrabold text-4xl">Course Management</h1>
-            </div>
-            <Button variant="brand" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New course</Button>
+          <div className="mb-8">
+            <p className="text-sm font-semibold text-[var(--ocean)] uppercase tracking-wider">Admin Dashboard</p>
+            <h1 className="font-display font-extrabold text-4xl">Welcome, {user?.email}</h1>
           </div>
 
-          <div className="grid lg:grid-cols-[1fr_380px] gap-8">
-            <div className="space-y-3">
-              {courses.map((c) => (
-                <div key={c.id} className="flex gap-4 p-4 rounded-2xl bg-card border border-border/60">
-                  {c.thumbnail_url ? (
-                    <img src={c.thumbnail_url} alt="" className="h-20 w-32 rounded-lg object-cover shrink-0" />
-                  ) : (
-                    <div className="h-20 w-32 rounded-lg bg-secondary shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · {c.level} · {c.duration}
-                      {c.featured && <span className="px-2 rounded-full bg-[var(--cyan)]/15 text-[var(--ocean)]">Featured</span>}
-                      {!c.published && <span className="px-2 rounded-full bg-destructive/15 text-destructive">Draft</span>}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+            {stats.map((s) => (
+              <div key={s.label} className="p-5 rounded-2xl bg-card border border-border/60 soft-shadow">
+                <s.icon className="h-5 w-5 text-[var(--cyan)] mb-2" />
+                <div className="font-display font-extrabold text-3xl">{s.value}</div>
+                <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition ${
+                  tab === t.id ? "gradient-brand text-white border-transparent" : "bg-background border-border/60 hover:border-[var(--cyan)]/50"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {tab === "courses" && (
+            <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+              <div className="space-y-3">
+                <div className="flex justify-end">
+                  <Button variant="brand" size="sm" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New course</Button>
+                </div>
+                {courses.map((c) => (
+                  <div key={c.id} className="flex gap-4 p-4 rounded-2xl bg-card border border-border/60">
+                    {c.thumbnail_url ? (
+                      <img src={c.thumbnail_url} alt="" className="h-20 w-32 rounded-lg object-cover shrink-0" />
+                    ) : (
+                      <div className="h-20 w-32 rounded-lg bg-secondary shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                        <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · {c.level} · {c.duration}
+                        {c.featured && <span className="px-2 rounded-full bg-[var(--cyan)]/15 text-[var(--ocean)]">Featured</span>}
+                        {!c.published && <span className="px-2 rounded-full bg-destructive/15 text-destructive">Draft</span>}
+                      </div>
+                      <h3 className="font-display font-bold truncate">{c.title}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{c.description}</p>
                     </div>
-                    <h3 className="font-display font-bold truncate">{c.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-1">{c.description}</p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
-                    <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                ))}
+                {courses.length === 0 && <p className="text-muted-foreground">No courses yet.</p>}
+              </div>
+
+              <form onSubmit={save} className="space-y-3 p-6 rounded-2xl bg-card border border-border/60 h-fit sticky top-24">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="font-display font-bold text-lg">{editing ? "Edit course" : "New course"}</h2>
+                  {editing && <button type="button" onClick={startCreate} className="text-xs text-muted-foreground"><X className="h-4 w-4" /></button>}
+                </div>
+
+                <input required placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border" />
+                <textarea required placeholder="Description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full p-3 rounded-lg bg-background border border-border resize-none" />
+                <input required placeholder="Instructor" value={form.instructor} onChange={(e) => setForm({ ...form, instructor: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input required placeholder="Duration (e.g. 8 weeks)" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} className="h-10 px-3 rounded-lg bg-background border border-border" />
+                  <input required placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="h-10 px-3 rounded-lg bg-background border border-border" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value as any })} className="h-10 px-3 rounded-lg bg-background border border-border">
+                    <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+                  </select>
+                  <input type="number" step="0.1" min="0" max="5" value={form.rating} onChange={(e) => setForm({ ...form, rating: parseFloat(e.target.value) })} className="h-10 px-3 rounded-lg bg-background border border-border" />
+                </div>
+
+                <label className="flex items-center gap-2 p-3 rounded-lg border border-dashed border-border cursor-pointer hover:bg-secondary/40">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  <span className="text-sm">{uploading ? "Uploading…" : "Upload thumbnail"}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadThumb(e.target.files[0])} />
+                </label>
+                <input placeholder="…or paste image URL" value={form.thumbnail_url ?? ""} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-xs" />
+                {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-full aspect-[16/10] object-cover rounded-lg" />}
+
+                <div className="flex gap-4 text-sm">
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} /> Featured</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} /> Published</label>
+                </div>
+
+                <Button type="submit" variant="brand" className="w-full" disabled={busy}>
+                  {busy ? "Saving…" : editing ? "Save changes" : "Create course"}
+                </Button>
+              </form>
+            </div>
+          )}
+
+          {tab === "enrollments" && (
+            <div className="space-y-3">
+              {enrollments.map((e) => (
+                <div key={e.id} className="p-5 rounded-2xl bg-card border border-border/60">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="min-w-0">
+                      <div className="text-xs text-[var(--ocean)] font-semibold uppercase tracking-wider">{e.course_title}</div>
+                      <h3 className="font-display font-bold mt-1">{e.name}</h3>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        <a href={`mailto:${e.email}`} className="hover:text-foreground">{e.email}</a>
+                        {e.phone && <> · {e.phone}</>}
+                      </div>
+                      {e.motivation && <p className="text-sm mt-3 max-w-2xl">{e.motivation}</p>}
+                      <p className="text-xs text-muted-foreground mt-2">Received {new Date(e.created_at).toLocaleString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select value={e.status} onChange={(ev) => setEnrollStatus(e.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="enrolled">Enrolled</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                      <button onClick={() => removeEnroll(e.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                    </div>
                   </div>
                 </div>
               ))}
-              {courses.length === 0 && <p className="text-muted-foreground">No courses yet.</p>}
+              {enrollments.length === 0 && <p className="text-muted-foreground py-12 text-center">No enrollment requests yet.</p>}
             </div>
+          )}
 
-            <form onSubmit={save} className="space-y-3 p-6 rounded-2xl bg-card border border-border/60 h-fit sticky top-24">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="font-display font-bold text-lg">{editing ? "Edit course" : "New course"}</h2>
-                {editing && <button type="button" onClick={startCreate} className="text-xs text-muted-foreground"><X className="h-4 w-4" /></button>}
-              </div>
+          {tab === "partners" && (
+            <div className="space-y-3">
+              {partners.map((p) => (
+                <div key={p.id} className="p-5 rounded-2xl bg-card border border-border/60">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="min-w-0">
+                      <div className="text-xs text-[var(--ocean)] font-semibold uppercase tracking-wider">{p.partnership_type || "Partnership"}</div>
+                      <h3 className="font-display font-bold mt-1">{p.name} {p.organization && <span className="font-normal text-muted-foreground">· {p.organization}</span>}</h3>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        <a href={`mailto:${p.email}`} className="hover:text-foreground">{p.email}</a>
+                        {p.phone && <> · {p.phone}</>}
+                      </div>
+                      {p.message && <p className="text-sm mt-3 max-w-2xl">{p.message}</p>}
+                      <p className="text-xs text-muted-foreground mt-2">Received {new Date(p.created_at).toLocaleString()}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select value={p.status} onChange={(ev) => setPartnerStatus(p.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="active">Active</option>
+                        <option value="declined">Declined</option>
+                      </select>
+                      <button onClick={() => removePartner(p.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {partners.length === 0 && <p className="text-muted-foreground py-12 text-center">No partner inquiries yet.</p>}
+            </div>
+          )}
 
-              <input required placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border" />
-              <textarea required placeholder="Description" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full p-3 rounded-lg bg-background border border-border resize-none" />
-              <input required placeholder="Instructor" value={form.instructor} onChange={(e) => setForm({ ...form, instructor: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border" />
-              <div className="grid grid-cols-2 gap-3">
-                <input required placeholder="Duration (e.g. 8 weeks)" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} className="h-10 px-3 rounded-lg bg-background border border-border" />
-                <input required placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="h-10 px-3 rounded-lg bg-background border border-border" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value as any })} className="h-10 px-3 rounded-lg bg-background border border-border">
-                  <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
-                </select>
-                <input type="number" step="0.1" min="0" max="5" value={form.rating} onChange={(e) => setForm({ ...form, rating: parseFloat(e.target.value) })} className="h-10 px-3 rounded-lg bg-background border border-border" />
-              </div>
-
-              <label className="flex items-center gap-2 p-3 rounded-lg border border-dashed border-border cursor-pointer hover:bg-secondary/40">
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                <span className="text-sm">{uploading ? "Uploading…" : "Upload thumbnail"}</span>
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && uploadThumb(e.target.files[0])} />
-              </label>
-              <input placeholder="…or paste image URL" value={form.thumbnail_url ?? ""} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-xs" />
-              {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-full aspect-[16/10] object-cover rounded-lg" />}
-
-              <div className="flex gap-4 text-sm">
-                <label className="flex items-center gap-2"><input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} /> Featured</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} /> Published</label>
-              </div>
-
-              <Button type="submit" variant="brand" className="w-full" disabled={busy}>
-                {busy ? "Saving…" : editing ? "Save changes" : "Create course"}
-              </Button>
-            </form>
-          </div>
-
-          <div className="mt-16">
-            <h2 className="font-display font-bold text-2xl mb-4">Newsletter subscribers ({subs.length})</h2>
+          {tab === "subscribers" && (
             <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-secondary/40 text-left">
@@ -256,7 +392,7 @@ function Admin() {
                 </tbody>
               </table>
             </div>
-          </div>
+          )}
         </div>
       </section>
       <Footer />
