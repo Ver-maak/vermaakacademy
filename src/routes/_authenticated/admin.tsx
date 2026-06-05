@@ -578,6 +578,18 @@ function Admin() {
                   <option value="active">Active</option>
                   <option value="declined">Declined</option>
                 </select>
+                <SortControl
+                  sortBy={partnerSort.by}
+                  sortDir={partnerSort.dir}
+                  onChange={(by, dir) => setPartnerSort({ by, dir })}
+                  options={[
+                    { value: "created_at", label: "Date received" },
+                    { value: "name", label: "Contact name" },
+                    { value: "organization", label: "Organization" },
+                    { value: "partnership_type", label: "Type" },
+                    { value: "status", label: "Status" },
+                  ]}
+                />
               </SearchBar>
               <div className="space-y-3">
                 {pagedPartners.map((p) => (
