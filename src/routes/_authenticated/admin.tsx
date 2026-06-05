@@ -625,7 +625,18 @@ function Admin() {
 
           {tab === "subscribers" && (
             <div>
-              <SearchBar value={subQ} onChange={setSubQ} placeholder="Search by email or name…" />
+              <SearchBar value={subQ} onChange={setSubQ} placeholder="Search by email or name…">
+                <SortControl
+                  sortBy={subSort.by}
+                  sortDir={subSort.dir}
+                  onChange={(by, dir) => setSubSort({ by, dir })}
+                  options={[
+                    { value: "created_at", label: "Date joined" },
+                    { value: "email", label: "Email" },
+                    { value: "name", label: "Name" },
+                  ]}
+                />
+              </SearchBar>
               <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary/40 text-left">
