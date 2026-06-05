@@ -304,40 +304,43 @@ function Admin() {
 
   const filteredCourses = useMemo(() => {
     const q = courseQ.toLowerCase().trim();
-    return courses.filter((c) => {
+    const filtered = courses.filter((c) => {
       if (courseCat !== "all" && c.category !== courseCat) return false;
       if (courseLevel !== "all" && c.level !== courseLevel) return false;
       if (!q) return true;
       return [c.title, c.description, c.instructor, c.category].some((v) => (v ?? "").toLowerCase().includes(q));
     });
-  }, [courses, courseQ, courseCat, courseLevel]);
+    return sortBy(filtered, courseSort.by as keyof CourseRow, courseSort.dir);
+  }, [courses, courseQ, courseCat, courseLevel, courseSort]);
   const pagedCourses = filteredCourses.slice((coursePage - 1) * PAGE_SIZE, coursePage * PAGE_SIZE);
 
   const filteredEnrollments = useMemo(() => {
     const q = enrollQ.toLowerCase().trim();
-    return enrollments.filter((e) => {
+    const filtered = enrollments.filter((e) => {
       if (enrollStatus !== "all" && e.status !== enrollStatus) return false;
       if (!q) return true;
       return [e.name, e.email, e.course_title, e.phone, e.motivation].some((v) => (v ?? "").toLowerCase().includes(q));
     });
-  }, [enrollments, enrollQ, enrollStatus]);
+    return sortBy(filtered, enrollSort.by as keyof Enrollment, enrollSort.dir);
+  }, [enrollments, enrollQ, enrollStatus, enrollSort]);
   const pagedEnrollments = filteredEnrollments.slice((enrollPage - 1) * PAGE_SIZE, enrollPage * PAGE_SIZE);
 
   const filteredPartners = useMemo(() => {
     const q = partnerQ.toLowerCase().trim();
-    return partners.filter((p) => {
+    const filtered = partners.filter((p) => {
       if (partnerStatusFilter !== "all" && p.status !== partnerStatusFilter) return false;
       if (!q) return true;
       return [p.name, p.email, p.organization, p.partnership_type, p.message].some((v) => (v ?? "").toLowerCase().includes(q));
     });
-  }, [partners, partnerQ, partnerStatusFilter]);
+    return sortBy(filtered, partnerSort.by as keyof Partner, partnerSort.dir);
+  }, [partners, partnerQ, partnerStatusFilter, partnerSort]);
   const pagedPartners = filteredPartners.slice((partnerPage - 1) * PAGE_SIZE, partnerPage * PAGE_SIZE);
 
   const filteredSubs = useMemo(() => {
     const q = subQ.toLowerCase().trim();
-    if (!q) return subs;
-    return subs.filter((s) => [s.email, s.name].some((v) => (v ?? "").toLowerCase().includes(q)));
-  }, [subs, subQ]);
+    const filtered = q ? subs.filter((s) => [s.email, s.name].some((v) => (v ?? "").toLowerCase().includes(q))) : subs;
+    return sortBy(filtered, subSort.by as keyof Subscriber, subSort.dir);
+  }, [subs, subQ, subSort]);
   const pagedSubs = filteredSubs.slice((subPage - 1) * PAGE_SIZE, subPage * PAGE_SIZE);
 
   if (loading) {
