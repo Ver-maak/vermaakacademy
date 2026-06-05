@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -46,6 +46,53 @@ const emptyForm: Omit<CourseRow, "id"> = {
 
 type Tab = "courses" | "enrollments" | "partners" | "subscribers";
 
+const PAGE_SIZE = 8;
+
+function Pager({ page, setPage, total }: { page: number; setPage: (n: number) => void; total: number }) {
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (total <= PAGE_SIZE) return null;
+  return (
+    <div className="flex items-center justify-between mt-5 text-sm">
+      <span className="text-muted-foreground">
+        Page {page} of {pages} · {total} total
+      </span>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => setPage(Math.max(1, page - 1))}
+          disabled={page <= 1}
+          className="h-9 w-9 rounded-full border border-border/60 inline-flex items-center justify-center disabled:opacity-40 hover:bg-secondary"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => setPage(Math.min(pages, page + 1))}
+          disabled={page >= pages}
+          className="h-9 w-9 rounded-full border border-border/60 inline-flex items-center justify-center disabled:opacity-40 hover:bg-secondary"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SearchBar({ value, onChange, placeholder, children }: { value: string; onChange: (v: string) => void; placeholder: string; children?: React.ReactNode }) {
+  return (
+    <div className="flex flex-col sm:flex-row gap-2 mb-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full h-10 pl-9 pr-3 rounded-lg bg-background border border-border"
+        />
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
@@ -58,6 +105,23 @@ function Admin() {
   const [form, setForm] = useState(emptyForm);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  // Search + filter state per tab
+  const [courseQ, setCourseQ] = useState("");
+  const [courseCat, setCourseCat] = useState("all");
+  const [courseLevel, setCourseLevel] = useState("all");
+  const [coursePage, setCoursePage] = useState(1);
+
+  const [enrollQ, setEnrollQ] = useState("");
+  const [enrollStatus, setEnrollStatusFilter] = useState("all");
+  const [enrollPage, setEnrollPage] = useState(1);
+
+  const [partnerQ, setPartnerQ] = useState("");
+  const [partnerStatusFilter, setPartnerStatusFilter] = useState("all");
+  const [partnerPage, setPartnerPage] = useState(1);
+
+  const [subQ, setSubQ] = useState("");
+  const [subPage, setSubPage] = useState(1);
 
   async function refresh() {
     const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
@@ -75,6 +139,12 @@ function Admin() {
   useEffect(() => {
     if (isAdmin) refresh();
   }, [isAdmin]);
+
+  // Reset page when filters change
+  useEffect(() => setCoursePage(1), [courseQ, courseCat, courseLevel]);
+  useEffect(() => setEnrollPage(1), [enrollQ, enrollStatus]);
+  useEffect(() => setPartnerPage(1), [partnerQ, partnerStatusFilter]);
+  useEffect(() => setSubPage(1), [subQ]);
 
   function startCreate() {
     setEditing(null);
@@ -154,7 +224,7 @@ function Admin() {
     if (error) return toast.error(error.message);
     refresh();
   }
-  async function setEnrollStatus(id: string, status: string) {
+  async function setEnrollStatusUpdate(id: string, status: string) {
     const { error } = await supabase.from("course_enrollments").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     refresh();
@@ -165,6 +235,47 @@ function Admin() {
     if (error) return toast.error(error.message);
     refresh();
   }
+
+  // Filtered + paginated views
+  const courseCats = useMemo(() => Array.from(new Set(courses.map((c) => c.category).filter(Boolean))), [courses]);
+
+  const filteredCourses = useMemo(() => {
+    const q = courseQ.toLowerCase().trim();
+    return courses.filter((c) => {
+      if (courseCat !== "all" && c.category !== courseCat) return false;
+      if (courseLevel !== "all" && c.level !== courseLevel) return false;
+      if (!q) return true;
+      return [c.title, c.description, c.instructor, c.category].some((v) => (v ?? "").toLowerCase().includes(q));
+    });
+  }, [courses, courseQ, courseCat, courseLevel]);
+  const pagedCourses = filteredCourses.slice((coursePage - 1) * PAGE_SIZE, coursePage * PAGE_SIZE);
+
+  const filteredEnrollments = useMemo(() => {
+    const q = enrollQ.toLowerCase().trim();
+    return enrollments.filter((e) => {
+      if (enrollStatus !== "all" && e.status !== enrollStatus) return false;
+      if (!q) return true;
+      return [e.name, e.email, e.course_title, e.phone, e.motivation].some((v) => (v ?? "").toLowerCase().includes(q));
+    });
+  }, [enrollments, enrollQ, enrollStatus]);
+  const pagedEnrollments = filteredEnrollments.slice((enrollPage - 1) * PAGE_SIZE, enrollPage * PAGE_SIZE);
+
+  const filteredPartners = useMemo(() => {
+    const q = partnerQ.toLowerCase().trim();
+    return partners.filter((p) => {
+      if (partnerStatusFilter !== "all" && p.status !== partnerStatusFilter) return false;
+      if (!q) return true;
+      return [p.name, p.email, p.organization, p.partnership_type, p.message].some((v) => (v ?? "").toLowerCase().includes(q));
+    });
+  }, [partners, partnerQ, partnerStatusFilter]);
+  const pagedPartners = filteredPartners.slice((partnerPage - 1) * PAGE_SIZE, partnerPage * PAGE_SIZE);
+
+  const filteredSubs = useMemo(() => {
+    const q = subQ.toLowerCase().trim();
+    if (!q) return subs;
+    return subs.filter((s) => [s.email, s.name].some((v) => (v ?? "").toLowerCase().includes(q)));
+  }, [subs, subQ]);
+  const pagedSubs = filteredSubs.slice((subPage - 1) * PAGE_SIZE, subPage * PAGE_SIZE);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
@@ -206,6 +317,8 @@ function Admin() {
     { id: "subscribers", label: `Subscribers (${subs.length})` },
   ];
 
+  const selectCls = "h-10 px-3 rounded-lg bg-background border border-border text-sm";
+
   return (
     <main className="min-h-screen">
       <Navbar />
@@ -242,33 +355,45 @@ function Admin() {
 
           {tab === "courses" && (
             <div className="grid lg:grid-cols-[1fr_380px] gap-8">
-              <div className="space-y-3">
-                <div className="flex justify-end">
-                  <Button variant="brand" size="sm" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New course</Button>
-                </div>
-                {courses.map((c) => (
-                  <div key={c.id} className="flex gap-4 p-4 rounded-2xl bg-card border border-border/60">
-                    {c.thumbnail_url ? (
-                      <img src={c.thumbnail_url} alt="" className="h-20 w-32 rounded-lg object-cover shrink-0" />
-                    ) : (
-                      <div className="h-20 w-32 rounded-lg bg-secondary shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-                        <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · {c.level} · {c.duration}
-                        {c.featured && <span className="px-2 rounded-full bg-[var(--cyan)]/15 text-[var(--ocean)]">Featured</span>}
-                        {!c.published && <span className="px-2 rounded-full bg-destructive/15 text-destructive">Draft</span>}
+              <div>
+                <SearchBar value={courseQ} onChange={setCourseQ} placeholder="Search by title, instructor, category…">
+                  <select value={courseCat} onChange={(e) => setCourseCat(e.target.value)} className={selectCls}>
+                    <option value="all">All categories</option>
+                    {courseCats.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <select value={courseLevel} onChange={(e) => setCourseLevel(e.target.value)} className={selectCls}>
+                    <option value="all">All levels</option>
+                    <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
+                  </select>
+                  <Button variant="brand" size="sm" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New</Button>
+                </SearchBar>
+
+                <div className="space-y-3">
+                  {pagedCourses.map((c) => (
+                    <div key={c.id} className="flex gap-4 p-4 rounded-2xl bg-card border border-border/60">
+                      {c.thumbnail_url ? (
+                        <img src={c.thumbnail_url} alt="" className="h-20 w-32 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className="h-20 w-32 rounded-lg bg-secondary shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                          <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · {c.level} · {c.duration}
+                          {c.featured && <span className="px-2 rounded-full bg-[var(--cyan)]/15 text-[var(--ocean)]">Featured</span>}
+                          {!c.published && <span className="px-2 rounded-full bg-destructive/15 text-destructive">Draft</span>}
+                        </div>
+                        <h3 className="font-display font-bold truncate">{c.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-1">{c.description}</p>
                       </div>
-                      <h3 className="font-display font-bold truncate">{c.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-1">{c.description}</p>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
-                    </div>
-                  </div>
-                ))}
-                {courses.length === 0 && <p className="text-muted-foreground">No courses yet.</p>}
+                  ))}
+                  {filteredCourses.length === 0 && <p className="text-muted-foreground py-8 text-center">No courses match.</p>}
+                </div>
+                <Pager page={coursePage} setPage={setCoursePage} total={filteredCourses.length} />
               </div>
 
               <form onSubmit={save} className="space-y-3 p-6 rounded-2xl bg-card border border-border/60 h-fit sticky top-24">
@@ -312,85 +437,113 @@ function Admin() {
           )}
 
           {tab === "enrollments" && (
-            <div className="space-y-3">
-              {enrollments.map((e) => (
-                <div key={e.id} className="p-5 rounded-2xl bg-card border border-border/60">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div className="min-w-0">
-                      <div className="text-xs text-[var(--ocean)] font-semibold uppercase tracking-wider">{e.course_title}</div>
-                      <h3 className="font-display font-bold mt-1">{e.name}</h3>
-                      <div className="text-sm text-muted-foreground mt-1">
-                        <a href={`mailto:${e.email}`} className="hover:text-foreground">{e.email}</a>
-                        {e.phone && <> · {e.phone}</>}
+            <div>
+              <SearchBar value={enrollQ} onChange={setEnrollQ} placeholder="Search by name, email, course…">
+                <select value={enrollStatus} onChange={(e) => setEnrollStatusFilter(e.target.value)} className={selectCls}>
+                  <option value="all">All statuses</option>
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="enrolled">Enrolled</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </SearchBar>
+              <div className="space-y-3">
+                {pagedEnrollments.map((e) => (
+                  <div key={e.id} className="p-5 rounded-2xl bg-card border border-border/60">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="min-w-0">
+                        <div className="text-xs text-[var(--ocean)] font-semibold uppercase tracking-wider">{e.course_title}</div>
+                        <h3 className="font-display font-bold mt-1">{e.name}</h3>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          <a href={`mailto:${e.email}`} className="hover:text-foreground">{e.email}</a>
+                          {e.phone && <> · {e.phone}</>}
+                        </div>
+                        {e.motivation && <p className="text-sm mt-3 max-w-2xl">{e.motivation}</p>}
+                        <p className="text-xs text-muted-foreground mt-2">Received {new Date(e.created_at).toLocaleString()}</p>
                       </div>
-                      {e.motivation && <p className="text-sm mt-3 max-w-2xl">{e.motivation}</p>}
-                      <p className="text-xs text-muted-foreground mt-2">Received {new Date(e.created_at).toLocaleString()}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <select value={e.status} onChange={(ev) => setEnrollStatus(e.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="enrolled">Enrolled</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                      <button onClick={() => removeEnroll(e.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                      <div className="flex items-center gap-2">
+                        <select value={e.status} onChange={(ev) => setEnrollStatusUpdate(e.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
+                          <option value="new">New</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="enrolled">Enrolled</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                        <button onClick={() => removeEnroll(e.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-              {enrollments.length === 0 && <p className="text-muted-foreground py-12 text-center">No enrollment requests yet.</p>}
+                ))}
+                {filteredEnrollments.length === 0 && <p className="text-muted-foreground py-12 text-center">No enrollment requests match.</p>}
+              </div>
+              <Pager page={enrollPage} setPage={setEnrollPage} total={filteredEnrollments.length} />
             </div>
           )}
 
           {tab === "partners" && (
-            <div className="space-y-3">
-              {partners.map((p) => (
-                <div key={p.id} className="p-5 rounded-2xl bg-card border border-border/60">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div className="min-w-0">
-                      <div className="text-xs text-[var(--ocean)] font-semibold uppercase tracking-wider">{p.partnership_type || "Partnership"}</div>
-                      <h3 className="font-display font-bold mt-1">{p.name} {p.organization && <span className="font-normal text-muted-foreground">· {p.organization}</span>}</h3>
-                      <div className="text-sm text-muted-foreground mt-1">
-                        <a href={`mailto:${p.email}`} className="hover:text-foreground">{p.email}</a>
-                        {p.phone && <> · {p.phone}</>}
+            <div>
+              <SearchBar value={partnerQ} onChange={setPartnerQ} placeholder="Search by name, organization, email…">
+                <select value={partnerStatusFilter} onChange={(e) => setPartnerStatusFilter(e.target.value)} className={selectCls}>
+                  <option value="all">All statuses</option>
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="active">Active</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </SearchBar>
+              <div className="space-y-3">
+                {pagedPartners.map((p) => (
+                  <div key={p.id} className="p-5 rounded-2xl bg-card border border-border/60">
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="min-w-0">
+                        <div className="text-xs text-[var(--ocean)] font-semibold uppercase tracking-wider">{p.partnership_type || "Partnership"}</div>
+                        <h3 className="font-display font-bold mt-1">{p.name} {p.organization && <span className="font-normal text-muted-foreground">· {p.organization}</span>}</h3>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          <a href={`mailto:${p.email}`} className="hover:text-foreground">{p.email}</a>
+                          {p.phone && <> · {p.phone}</>}
+                        </div>
+                        {p.message && <p className="text-sm mt-3 max-w-2xl">{p.message}</p>}
+                        <p className="text-xs text-muted-foreground mt-2">Received {new Date(p.created_at).toLocaleString()}</p>
                       </div>
-                      {p.message && <p className="text-sm mt-3 max-w-2xl">{p.message}</p>}
-                      <p className="text-xs text-muted-foreground mt-2">Received {new Date(p.created_at).toLocaleString()}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <select value={p.status} onChange={(ev) => setPartnerStatus(p.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="active">Active</option>
-                        <option value="declined">Declined</option>
-                      </select>
-                      <button onClick={() => removePartner(p.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                      <div className="flex items-center gap-2">
+                        <select value={p.status} onChange={(ev) => setPartnerStatus(p.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
+                          <option value="new">New</option>
+                          <option value="contacted">Contacted</option>
+                          <option value="active">Active</option>
+                          <option value="declined">Declined</option>
+                        </select>
+                        <button onClick={() => removePartner(p.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-              {partners.length === 0 && <p className="text-muted-foreground py-12 text-center">No partner inquiries yet.</p>}
+                ))}
+                {filteredPartners.length === 0 && <p className="text-muted-foreground py-12 text-center">No partner inquiries match.</p>}
+              </div>
+              <Pager page={partnerPage} setPage={setPartnerPage} total={filteredPartners.length} />
             </div>
           )}
 
           {tab === "subscribers" && (
-            <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary/40 text-left">
-                  <tr><th className="p-3">Email</th><th className="p-3">Name</th><th className="p-3">Joined</th><th className="p-3"></th></tr>
-                </thead>
-                <tbody>
-                  {subs.map((s) => (
-                    <tr key={s.id} className="border-t border-border/60">
-                      <td className="p-3">{s.email}</td>
-                      <td className="p-3 text-muted-foreground">{s.name || "—"}</td>
-                      <td className="p-3 text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</td>
-                      <td className="p-3 text-right"><button onClick={() => removeSub(s.id)} className="text-destructive hover:underline text-xs">Remove</button></td>
-                    </tr>
-                  ))}
-                  {subs.length === 0 && <tr><td className="p-6 text-center text-muted-foreground" colSpan={4}>No subscribers yet.</td></tr>}
-                </tbody>
-              </table>
+            <div>
+              <SearchBar value={subQ} onChange={setSubQ} placeholder="Search by email or name…" />
+              <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-secondary/40 text-left">
+                    <tr><th className="p-3">Email</th><th className="p-3">Name</th><th className="p-3">Joined</th><th className="p-3"></th></tr>
+                  </thead>
+                  <tbody>
+                    {pagedSubs.map((s) => (
+                      <tr key={s.id} className="border-t border-border/60">
+                        <td className="p-3">{s.email}</td>
+                        <td className="p-3 text-muted-foreground">{s.name || "—"}</td>
+                        <td className="p-3 text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</td>
+                        <td className="p-3 text-right"><button onClick={() => removeSub(s.id)} className="text-destructive hover:underline text-xs">Remove</button></td>
+                      </tr>
+                    ))}
+                    {filteredSubs.length === 0 && <tr><td className="p-6 text-center text-muted-foreground" colSpan={4}>No subscribers match.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+              <Pager page={subPage} setPage={setSubPage} total={filteredSubs.length} />
             </div>
           )}
         </div>
