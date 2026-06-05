@@ -93,6 +93,65 @@ function SearchBar({ value, onChange, placeholder, children }: { value: string; 
   );
 }
 
+type SortDir = "asc" | "desc";
+type SortOpt = { value: string; label: string };
+
+function SortControl({
+  options,
+  sortBy,
+  sortDir,
+  onChange,
+}: {
+  options: SortOpt[];
+  sortBy: string;
+  sortDir: SortDir;
+  onChange: (by: string, dir: SortDir) => void;
+}) {
+  const current = options.find((o) => o.value === sortBy);
+  return (
+    <div className="inline-flex items-stretch rounded-lg border border-border bg-background overflow-hidden">
+      <div className="flex items-center pl-3 pr-1 text-xs text-muted-foreground gap-1">
+        <ArrowUpDown className="h-3.5 w-3.5" /> Sort
+      </div>
+      <select
+        value={sortBy}
+        onChange={(e) => onChange(e.target.value, sortDir)}
+        className="h-10 px-2 bg-background text-sm border-x border-border focus:outline-none"
+        aria-label="Sort by"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+      <button
+        type="button"
+        onClick={() => onChange(sortBy, sortDir === "asc" ? "desc" : "asc")}
+        className="px-3 inline-flex items-center gap-1 text-xs font-medium hover:bg-secondary"
+        aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}`}
+        title={`${current?.label ?? ""} — ${sortDir === "asc" ? "Ascending" : "Descending"}`}
+      >
+        {sortDir === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+        {sortDir === "asc" ? "Asc" : "Desc"}
+      </button>
+    </div>
+  );
+}
+
+function cmp(a: any, b: any): number {
+  if (a == null && b == null) return 0;
+  if (a == null) return -1;
+  if (b == null) return 1;
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  if (typeof a === "boolean" && typeof b === "boolean") return (a === b ? 0 : a ? 1 : -1);
+  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+}
+
+function sortBy<T>(arr: T[], key: keyof T | ((row: T) => any), dir: SortDir): T[] {
+  const get = typeof key === "function" ? (key as (r: T) => any) : (r: T) => r[key];
+  const sorted = [...arr].sort((a, b) => cmp(get(a), get(b)));
+  return dir === "asc" ? sorted : sorted.reverse();
+}
+
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
