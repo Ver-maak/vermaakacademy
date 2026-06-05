@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Users, Globe, Award, Rocket, Brain, Palette, Code2, Camera, Megaphone, Gamepad2, Box, Film, Lightbulb } from "lucide-react";
+import { ArrowRight, Sparkles, Users, Globe, Award, Rocket, Brain, Palette, Code2, Camera, Megaphone, Gamepad2, Box, Film, Lightbulb, Handshake } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -7,6 +7,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { CourseCard, type CourseCardData } from "@/components/CourseCard";
 import { Counter } from "@/components/Counter";
+import { PartnerForm } from "@/components/PartnerForm";
+import { EnrollForm } from "@/components/EnrollForm";
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-waves.jpg";
@@ -51,11 +53,11 @@ const whyItems = [
   { icon: Award, title: "Hands-on Projects", desc: "Ship portfolio-grade work, not toy assignments." },
 ];
 
-const testimonials = [
-  { name: "Chidi Eze", role: "Product Designer, Lagos", quote: "Vermaak rewired how I think about craft. The mentorship alone was worth it." },
-  { name: "Aisha Bello", role: "Frontend Dev, Nairobi", quote: "I shipped my first production app in week 6. The community keeps me leveled up." },
-  { name: "Tendai Moyo", role: "Brand Designer, Harare", quote: "Finally a platform that treats African creatives as world-class — because we are." },
-];
+function Home() {
+  const [featured, setFeatured] = useState<CourseCardData[]>([]);
+  const [partnerOpen, setPartnerOpen] = useState(false);
+  const [enrollFor, setEnrollFor] = useState<CourseCardData | null>(null);
+
 
 function Home() {
   const [featured, setFeatured] = useState<CourseCardData[]>([]);
