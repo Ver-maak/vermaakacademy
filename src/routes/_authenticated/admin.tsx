@@ -170,17 +170,21 @@ function Admin() {
   const [courseCat, setCourseCat] = useState("all");
   const [courseLevel, setCourseLevel] = useState("all");
   const [coursePage, setCoursePage] = useState(1);
+  const [courseSort, setCourseSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   const [enrollQ, setEnrollQ] = useState("");
   const [enrollStatus, setEnrollStatusFilter] = useState("all");
   const [enrollPage, setEnrollPage] = useState(1);
+  const [enrollSort, setEnrollSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   const [partnerQ, setPartnerQ] = useState("");
   const [partnerStatusFilter, setPartnerStatusFilter] = useState("all");
   const [partnerPage, setPartnerPage] = useState(1);
+  const [partnerSort, setPartnerSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   const [subQ, setSubQ] = useState("");
   const [subPage, setSubPage] = useState(1);
+  const [subSort, setSubSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   async function refresh() {
     const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
