@@ -524,6 +524,17 @@ function Admin() {
                   <option value="enrolled">Enrolled</option>
                   <option value="rejected">Rejected</option>
                 </select>
+                <SortControl
+                  sortBy={enrollSort.by}
+                  sortDir={enrollSort.dir}
+                  onChange={(by, dir) => setEnrollSort({ by, dir })}
+                  options={[
+                    { value: "created_at", label: "Date received" },
+                    { value: "name", label: "Name" },
+                    { value: "course_title", label: "Course" },
+                    { value: "status", label: "Status" },
+                  ]}
+                />
               </SearchBar>
               <div className="space-y-3">
                 {pagedEnrollments.map((e) => (
