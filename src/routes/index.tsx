@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Users, Globe, Award, Rocket, Brain, Palette, Code2, Camera, Megaphone, Gamepad2, Box, Film, Lightbulb } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { CourseCard } from "@/components/CourseCard";
+import { CourseCard, type CourseCardData } from "@/components/CourseCard";
 import { Counter } from "@/components/Counter";
-import { courses } from "@/data/courses";
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-waves.jpg";
 import logo from "@/assets/vermaak-logo.png";
@@ -57,7 +58,16 @@ const testimonials = [
 ];
 
 function Home() {
-  const featured = courses.filter((c) => c.featured).slice(0, 6);
+  const [featured, setFeatured] = useState<CourseCardData[]>([]);
+  useEffect(() => {
+    supabase
+      .from("courses")
+      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating")
+      .eq("published", true)
+      .eq("featured", true)
+      .limit(6)
+      .then(({ data }) => setFeatured((data as CourseCardData[]) ?? []));
+  }, []);
 
   return (
     <main className="min-h-screen">
