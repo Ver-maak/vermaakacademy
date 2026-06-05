@@ -80,10 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Vermaak Academy — Creative-Tech Learning for Africa" },
       { name: "description", content: "Premium online courses in design, code, AI and entrepreneurship for African creatives and innovators." },
-      { property: "og:title", content: "Vermaak Academy" },
-      { property: "og:description", content: "Future-ready digital skills for African youth and creatives." },
+      { property: "og:title", content: "Vermaak Academy — Creative-Tech Learning for Africa" },
+      { property: "og:description", content: "Premium online courses in design, code, AI and entrepreneurship for African creatives and innovators." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Vermaak Academy — Creative-Tech Learning for Africa" },
+      { name: "twitter:description", content: "Premium online courses in design, code, AI and entrepreneurship for African creatives and innovators." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/6f6149e1-7442-4e65-a3f8-80932122e253" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/6f6149e1-7442-4e65-a3f8-80932122e253" },
     ],
     links: [
       {
