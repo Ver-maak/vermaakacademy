@@ -131,26 +131,6 @@ function About() {
         </div>
       </section>
 
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-sm font-semibold text-[var(--ocean)] uppercase tracking-wider mb-2">Team</p>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl">The builders behind it</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {team.map((t, i) => (
-              <motion.div key={t.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }} className="p-6 rounded-2xl bg-card border border-border/60 text-center soft-shadow">
-                <div className="h-20 w-20 mx-auto rounded-full gradient-brand flex items-center justify-center text-white font-display font-bold text-2xl mb-4">
-                  {t.name.split(" ").map(n => n[0]).join("")}
-                </div>
-                <p className="font-display font-bold">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.role}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="py-24">
         <div className="mx-auto max-w-4xl px-5 lg:px-8 text-center">
           <Users className="h-10 w-10 mx-auto text-[var(--cyan)] mb-5" />

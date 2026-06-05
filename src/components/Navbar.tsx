@@ -71,13 +71,9 @@ export function Navbar() {
           >
             {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
-          {user ? (
+          {user && (
             <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-1.5" /> Sign out
-            </Button>
-          ) : (
-            <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
-              <Link to="/auth">Sign in</Link>
             </Button>
           )}
           <Button asChild variant="brand" size="sm" className="hidden sm:inline-flex">
@@ -110,10 +106,8 @@ export function Navbar() {
               Admin
             </Link>
           )}
-          {user ? (
+          {user && (
             <Button variant="outline" className="w-full mt-2" onClick={() => { setOpen(false); signOut(); }}>Sign out</Button>
-          ) : (
-            <Button asChild variant="outline" className="w-full mt-2"><Link to="/auth" onClick={() => setOpen(false)}>Sign in</Link></Button>
           )}
           <Button asChild variant="brand" className="w-full">
             <Link to="/courses" onClick={() => setOpen(false)}>Start Learning</Link>
