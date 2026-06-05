@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -93,6 +93,65 @@ function SearchBar({ value, onChange, placeholder, children }: { value: string; 
   );
 }
 
+type SortDir = "asc" | "desc";
+type SortOpt = { value: string; label: string };
+
+function SortControl({
+  options,
+  sortBy,
+  sortDir,
+  onChange,
+}: {
+  options: SortOpt[];
+  sortBy: string;
+  sortDir: SortDir;
+  onChange: (by: string, dir: SortDir) => void;
+}) {
+  const current = options.find((o) => o.value === sortBy);
+  return (
+    <div className="inline-flex items-stretch rounded-lg border border-border bg-background overflow-hidden">
+      <div className="flex items-center pl-3 pr-1 text-xs text-muted-foreground gap-1">
+        <ArrowUpDown className="h-3.5 w-3.5" /> Sort
+      </div>
+      <select
+        value={sortBy}
+        onChange={(e) => onChange(e.target.value, sortDir)}
+        className="h-10 px-2 bg-background text-sm border-x border-border focus:outline-none"
+        aria-label="Sort by"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+      <button
+        type="button"
+        onClick={() => onChange(sortBy, sortDir === "asc" ? "desc" : "asc")}
+        className="px-3 inline-flex items-center gap-1 text-xs font-medium hover:bg-secondary"
+        aria-label={`Sort direction: ${sortDir === "asc" ? "ascending" : "descending"}`}
+        title={`${current?.label ?? ""} — ${sortDir === "asc" ? "Ascending" : "Descending"}`}
+      >
+        {sortDir === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />}
+        {sortDir === "asc" ? "Asc" : "Desc"}
+      </button>
+    </div>
+  );
+}
+
+function cmp(a: any, b: any): number {
+  if (a == null && b == null) return 0;
+  if (a == null) return -1;
+  if (b == null) return 1;
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  if (typeof a === "boolean" && typeof b === "boolean") return (a === b ? 0 : a ? 1 : -1);
+  return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: "base" });
+}
+
+function sortBy<T>(arr: T[], key: keyof T | ((row: T) => any), dir: SortDir): T[] {
+  const get = typeof key === "function" ? (key as (r: T) => any) : (r: T) => r[key];
+  const sorted = [...arr].sort((a, b) => cmp(get(a), get(b)));
+  return dir === "asc" ? sorted : sorted.reverse();
+}
+
 function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
@@ -111,17 +170,21 @@ function Admin() {
   const [courseCat, setCourseCat] = useState("all");
   const [courseLevel, setCourseLevel] = useState("all");
   const [coursePage, setCoursePage] = useState(1);
+  const [courseSort, setCourseSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   const [enrollQ, setEnrollQ] = useState("");
   const [enrollStatus, setEnrollStatusFilter] = useState("all");
   const [enrollPage, setEnrollPage] = useState(1);
+  const [enrollSort, setEnrollSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   const [partnerQ, setPartnerQ] = useState("");
   const [partnerStatusFilter, setPartnerStatusFilter] = useState("all");
   const [partnerPage, setPartnerPage] = useState(1);
+  const [partnerSort, setPartnerSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   const [subQ, setSubQ] = useState("");
   const [subPage, setSubPage] = useState(1);
+  const [subSort, setSubSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
   async function refresh() {
     const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
@@ -241,40 +304,43 @@ function Admin() {
 
   const filteredCourses = useMemo(() => {
     const q = courseQ.toLowerCase().trim();
-    return courses.filter((c) => {
+    const filtered = courses.filter((c) => {
       if (courseCat !== "all" && c.category !== courseCat) return false;
       if (courseLevel !== "all" && c.level !== courseLevel) return false;
       if (!q) return true;
       return [c.title, c.description, c.instructor, c.category].some((v) => (v ?? "").toLowerCase().includes(q));
     });
-  }, [courses, courseQ, courseCat, courseLevel]);
+    return sortBy(filtered, courseSort.by as keyof CourseRow, courseSort.dir);
+  }, [courses, courseQ, courseCat, courseLevel, courseSort]);
   const pagedCourses = filteredCourses.slice((coursePage - 1) * PAGE_SIZE, coursePage * PAGE_SIZE);
 
   const filteredEnrollments = useMemo(() => {
     const q = enrollQ.toLowerCase().trim();
-    return enrollments.filter((e) => {
+    const filtered = enrollments.filter((e) => {
       if (enrollStatus !== "all" && e.status !== enrollStatus) return false;
       if (!q) return true;
       return [e.name, e.email, e.course_title, e.phone, e.motivation].some((v) => (v ?? "").toLowerCase().includes(q));
     });
-  }, [enrollments, enrollQ, enrollStatus]);
+    return sortBy(filtered, enrollSort.by as keyof Enrollment, enrollSort.dir);
+  }, [enrollments, enrollQ, enrollStatus, enrollSort]);
   const pagedEnrollments = filteredEnrollments.slice((enrollPage - 1) * PAGE_SIZE, enrollPage * PAGE_SIZE);
 
   const filteredPartners = useMemo(() => {
     const q = partnerQ.toLowerCase().trim();
-    return partners.filter((p) => {
+    const filtered = partners.filter((p) => {
       if (partnerStatusFilter !== "all" && p.status !== partnerStatusFilter) return false;
       if (!q) return true;
       return [p.name, p.email, p.organization, p.partnership_type, p.message].some((v) => (v ?? "").toLowerCase().includes(q));
     });
-  }, [partners, partnerQ, partnerStatusFilter]);
+    return sortBy(filtered, partnerSort.by as keyof Partner, partnerSort.dir);
+  }, [partners, partnerQ, partnerStatusFilter, partnerSort]);
   const pagedPartners = filteredPartners.slice((partnerPage - 1) * PAGE_SIZE, partnerPage * PAGE_SIZE);
 
   const filteredSubs = useMemo(() => {
     const q = subQ.toLowerCase().trim();
-    if (!q) return subs;
-    return subs.filter((s) => [s.email, s.name].some((v) => (v ?? "").toLowerCase().includes(q)));
-  }, [subs, subQ]);
+    const filtered = q ? subs.filter((s) => [s.email, s.name].some((v) => (v ?? "").toLowerCase().includes(q))) : subs;
+    return sortBy(filtered, subSort.by as keyof Subscriber, subSort.dir);
+  }, [subs, subQ, subSort]);
   const pagedSubs = filteredSubs.slice((subPage - 1) * PAGE_SIZE, subPage * PAGE_SIZE);
 
   if (loading) {
@@ -365,6 +431,18 @@ function Admin() {
                     <option value="all">All levels</option>
                     <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
                   </select>
+                  <SortControl
+                    sortBy={courseSort.by}
+                    sortDir={courseSort.dir}
+                    onChange={(by, dir) => setCourseSort({ by, dir })}
+                    options={[
+                      { value: "created_at", label: "Newest" },
+                      { value: "title", label: "Title" },
+                      { value: "category", label: "Category" },
+                      { value: "level", label: "Level" },
+                      { value: "rating", label: "Rating" },
+                    ]}
+                  />
                   <Button variant="brand" size="sm" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New</Button>
                 </SearchBar>
 
@@ -446,6 +524,17 @@ function Admin() {
                   <option value="enrolled">Enrolled</option>
                   <option value="rejected">Rejected</option>
                 </select>
+                <SortControl
+                  sortBy={enrollSort.by}
+                  sortDir={enrollSort.dir}
+                  onChange={(by, dir) => setEnrollSort({ by, dir })}
+                  options={[
+                    { value: "created_at", label: "Date received" },
+                    { value: "name", label: "Name" },
+                    { value: "course_title", label: "Course" },
+                    { value: "status", label: "Status" },
+                  ]}
+                />
               </SearchBar>
               <div className="space-y-3">
                 {pagedEnrollments.map((e) => (
@@ -489,6 +578,18 @@ function Admin() {
                   <option value="active">Active</option>
                   <option value="declined">Declined</option>
                 </select>
+                <SortControl
+                  sortBy={partnerSort.by}
+                  sortDir={partnerSort.dir}
+                  onChange={(by, dir) => setPartnerSort({ by, dir })}
+                  options={[
+                    { value: "created_at", label: "Date received" },
+                    { value: "name", label: "Contact name" },
+                    { value: "organization", label: "Organization" },
+                    { value: "partnership_type", label: "Type" },
+                    { value: "status", label: "Status" },
+                  ]}
+                />
               </SearchBar>
               <div className="space-y-3">
                 {pagedPartners.map((p) => (
@@ -524,7 +625,18 @@ function Admin() {
 
           {tab === "subscribers" && (
             <div>
-              <SearchBar value={subQ} onChange={setSubQ} placeholder="Search by email or name…" />
+              <SearchBar value={subQ} onChange={setSubQ} placeholder="Search by email or name…">
+                <SortControl
+                  sortBy={subSort.by}
+                  sortDir={subSort.dir}
+                  onChange={(by, dir) => setSubSort({ by, dir })}
+                  options={[
+                    { value: "created_at", label: "Date joined" },
+                    { value: "email", label: "Email" },
+                    { value: "name", label: "Name" },
+                  ]}
+                />
+              </SearchBar>
               <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary/40 text-left">
