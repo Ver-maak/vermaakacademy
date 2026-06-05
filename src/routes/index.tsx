@@ -178,7 +178,7 @@ function Home() {
             <p className="mt-3 text-muted-foreground">Real projects, real mentors, real outcomes.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((c) => <CourseCard key={c.id} course={c} />)}
+            {featured.map((c) => <CourseCard key={c.id} course={c} onClick={() => setEnrollFor(c)} />)}
           </div>
         </div>
       </section>
@@ -285,6 +285,9 @@ function Home() {
           </div>
         </div>
       </section>
+
+      <PartnerForm open={partnerOpen} onClose={() => setPartnerOpen(false)} />
+      <EnrollForm open={!!enrollFor} onClose={() => setEnrollFor(null)} course={enrollFor ? { id: enrollFor.id, title: enrollFor.title } : null} />
 
       <Footer />
     </main>
