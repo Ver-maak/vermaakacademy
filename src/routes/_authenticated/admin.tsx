@@ -431,6 +431,18 @@ function Admin() {
                     <option value="all">All levels</option>
                     <option>Beginner</option><option>Intermediate</option><option>Advanced</option>
                   </select>
+                  <SortControl
+                    sortBy={courseSort.by}
+                    sortDir={courseSort.dir}
+                    onChange={(by, dir) => setCourseSort({ by, dir })}
+                    options={[
+                      { value: "created_at", label: "Newest" },
+                      { value: "title", label: "Title" },
+                      { value: "category", label: "Category" },
+                      { value: "level", label: "Level" },
+                      { value: "rating", label: "Rating" },
+                    ]}
+                  />
                   <Button variant="brand" size="sm" onClick={startCreate}><Plus className="h-4 w-4 mr-1" /> New</Button>
                 </SearchBar>
 
