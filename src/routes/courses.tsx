@@ -1,0 +1,185 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { Search, LayoutGrid, List, X, Star, Clock, BarChart3 } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { CourseCard } from "@/components/CourseCard";
+import { Button } from "@/components/ui/button";
+import { courses, categories, type Course } from "@/data/courses";
+
+export const Route = createFileRoute("/courses")({
+  head: () => ({
+    meta: [
+      { title: "Courses — Vermaak Academy" },
+      { name: "description", content: "Browse premium creative-tech courses across design, code, AI, marketing and more." },
+      { property: "og:title", content: "Vermaak Academy Courses" },
+      { property: "og:description", content: "Find the course that levels you up." },
+    ],
+  }),
+  component: Courses,
+});
+
+const levels = ["All", "Beginner", "Intermediate", "Advanced"] as const;
+const sorts = ["Featured", "Top Rated", "Shortest"] as const;
+
+function Courses() {
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState<string>("All");
+  const [level, setLevel] = useState<(typeof levels)[number]>("All");
+  const [sort, setSort] = useState<(typeof sorts)[number]>("Featured");
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const [active, setActive] = useState<Course | null>(null);
+
+  const list = useMemo(() => {
+    let r = courses.filter((c) => {
+      if (cat !== "All" && c.category !== cat) return false;
+      if (level !== "All" && c.level !== level) return false;
+      if (q && !`${c.title} ${c.description} ${c.instructor}`.toLowerCase().includes(q.toLowerCase())) return false;
+      return true;
+    });
+    if (sort === "Top Rated") r = [...r].sort((a, b) => b.rating - a.rating);
+    if (sort === "Shortest") r = [...r].sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
+    if (sort === "Featured") r = [...r].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+    return r;
+  }, [q, cat, level, sort]);
+
+  return (
+    <main className="min-h-screen">
+      <Navbar />
+
+      <section className="relative pt-36 pb-12 overflow-hidden">
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,oklch(0.74_0.13_230/0.2),transparent_60%)]" />
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 text-center">
+          <p className="text-sm font-semibold text-[var(--ocean)] uppercase tracking-wider mb-2">Course Library</p>
+          <h1 className="font-display font-extrabold text-5xl sm:text-6xl leading-tight">
+            Find your <span className="gradient-text">next skill</span>.
+          </h1>
+          <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+            {courses.length} expert-led courses across creative-tech, design, code and entrepreneurship.
+          </p>
+
+          <div className="mt-8 max-w-2xl mx-auto relative">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search courses, instructors, topics…"
+              className="w-full h-14 pl-14 pr-5 rounded-full bg-card border border-border/60 soft-shadow focus:outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-8 border-y border-border/60 bg-secondary/30 sticky top-16 z-30 glass">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8 flex flex-wrap gap-3 items-center">
+          <div className="flex gap-2 overflow-x-auto pb-1 flex-1 min-w-0">
+            {["All", ...categories].map((c) => (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-medium border transition ${
+                  cat === c ? "gradient-brand text-white border-transparent" : "bg-background border-border/60 hover:border-[var(--cyan)]/50"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <select value={level} onChange={(e) => setLevel(e.target.value as any)} className="h-9 px-3 rounded-full text-xs bg-background border border-border/60">
+            {levels.map((l) => <option key={l}>{l}</option>)}
+          </select>
+          <select value={sort} onChange={(e) => setSort(e.target.value as any)} className="h-9 px-3 rounded-full text-xs bg-background border border-border/60">
+            {sorts.map((s) => <option key={s}>{s}</option>)}
+          </select>
+          <div className="flex items-center gap-1 rounded-full bg-background border border-border/60 p-1">
+            <button onClick={() => setView("grid")} aria-label="Grid view" className={`h-7 w-7 rounded-full flex items-center justify-center ${view === "grid" ? "bg-secondary" : ""}`}><LayoutGrid className="h-3.5 w-3.5" /></button>
+            <button onClick={() => setView("list")} aria-label="List view" className={`h-7 w-7 rounded-full flex items-center justify-center ${view === "list" ? "bg-secondary" : ""}`}><List className="h-3.5 w-3.5" /></button>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8">
+          <p className="text-sm text-muted-foreground mb-6">{list.length} {list.length === 1 ? "course" : "courses"}</p>
+          {list.length === 0 ? (
+            <div className="text-center py-24 rounded-3xl bg-card border border-border/60">
+              <p className="font-display font-bold text-xl">No courses match those filters</p>
+              <p className="text-muted-foreground mt-2">Try clearing a filter or searching for something else.</p>
+              <Button className="mt-6" variant="outline" onClick={() => { setQ(""); setCat("All"); setLevel("All"); }}>Reset filters</Button>
+            </div>
+          ) : view === "grid" ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {list.map((c) => <CourseCard key={c.id} course={c} onClick={() => setActive(c)} />)}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {list.map((c) => (
+                <button key={c.id} onClick={() => setActive(c)} className="w-full flex gap-5 p-4 rounded-2xl bg-card border border-border/60 hover:border-[var(--cyan)]/50 transition text-left">
+                  <img src={c.thumbnail} alt="" className="h-28 w-44 rounded-xl object-cover shrink-0" loading="lazy" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                      <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · <span>{c.level}</span>
+                    </div>
+                    <h3 className="font-display font-bold text-lg">{c.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{c.description}</p>
+                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.duration}</span>
+                      <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-[var(--cyan)] text-[var(--cyan)]" />{c.rating}</span>
+                      <span className="flex items-center gap-1"><BarChart3 className="h-3 w-3" />{c.instructor}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {active && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setActive(null)}>
+          <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border/60 soft-shadow">
+            <button onClick={() => setActive(null)} aria-label="Close" className="absolute top-4 right-4 z-10 h-9 w-9 rounded-full glass flex items-center justify-center"><X className="h-4 w-4" /></button>
+            <img src={active.thumbnail} alt="" className="w-full aspect-[2/1] object-cover" />
+            <div className="p-7">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                <span className="font-semibold text-[var(--ocean)] uppercase tracking-wider">{active.category}</span> · <span>{active.level}</span> · <span>{active.duration}</span>
+              </div>
+              <h2 className="font-display font-extrabold text-3xl mb-2">{active.title}</h2>
+              <p className="text-muted-foreground leading-relaxed">{active.description}</p>
+
+              <div className="mt-6 grid sm:grid-cols-2 gap-5">
+                <div>
+                  <h3 className="font-display font-bold mb-2">What you'll learn</h3>
+                  <ul className="text-sm text-muted-foreground space-y-1.5 list-disc pl-5">
+                    <li>Foundational concepts and modern best practices</li>
+                    <li>Real project work shipped to your portfolio</li>
+                    <li>Industry workflows used by top studios</li>
+                    <li>Mentor feedback and peer reviews</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-display font-bold mb-2">Curriculum preview</h3>
+                  <ul className="text-sm text-muted-foreground space-y-1.5">
+                    {["Foundations", "Core craft", "Advanced techniques", "Capstone project"].map((m, i) => (
+                      <li key={m} className="flex gap-2"><span className="text-[var(--cyan)] font-semibold">0{i + 1}.</span>{m}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-border/60 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Instructor</p>
+                  <p className="font-semibold">{active.instructor}</p>
+                </div>
+                <Button size="lg" variant="brand">Enroll Now</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Footer />
+    </main>
+  );
+}
