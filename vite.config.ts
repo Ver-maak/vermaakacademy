@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force-on nitro so self-deploys (Netlify, Vercel, etc.) get an SSR build.
+  // Inside the Lovable sandbox the cloudflare preset is still forced; outside
+  // it, Nitro's zero-config detection picks the right preset (NETLIFY=true
+  // selects the Netlify preset automatically).
+  nitro: true,
 });
