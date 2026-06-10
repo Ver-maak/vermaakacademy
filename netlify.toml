@@ -1,8 +1,7 @@
-＃ Netlify deployment config for the TanStack Start app.
-＃ Nitro auto-detects the Netlify preset during `bun run build` (because
-＃ NETLIFY=true is set in the build env) and emits a Netlify Function plus
-＃ the static client assets. Netlify reads `.netlify/` from the build output
-＃ and wires everything up automatically — no redirects file needed.
+# Netlify deployment config for the TanStack Start app.
+# Nitro auto-detects the Netlify preset during `bun run build` (NETLIFY=true
+# is set in the build env) and emits a Netlify Function plus the static
+# client assets under .netlify/, which Netlify wires up automatically.
 
 [build]
   command = "bun run build"
@@ -10,12 +9,5 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  ＃ Pin the Nitro preset explicitly so the build target is deterministic
-  ＃ even if Netlify's auto-detection env vars change.
+  # Pin the Nitro preset explicitly so the build target stays deterministic.
   NITRO_PRESET = "netlify"
-
-[functions]
-  ＃ Bundle the SSR function with esbuild and include WASM/binary assets
-  ＃ that Nitro/Vite emit alongside it.
-  node_bundler = "esbuild"
-  included_files = ["dist/**"]
