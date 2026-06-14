@@ -262,6 +262,14 @@ function Admin() {
     refresh();
   }
 
+  async function togglePublished(c: CourseRow) {
+    const next = !c.published;
+    const { error } = await supabase.from("courses").update({ published: next }).eq("id", c.id);
+    if (error) return toast.error(error.message);
+    toast.success(next ? "Course published" : "Course unpublished");
+    refresh();
+  }
+
   async function uploadThumb(file: File) {
     setUploading(true);
     try {
