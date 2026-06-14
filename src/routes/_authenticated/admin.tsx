@@ -877,18 +877,30 @@ function Admin() {
               <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary/40 text-left">
-                    <tr><th className="p-3">Email</th><th className="p-3">Name</th><th className="p-3">Joined</th><th className="p-3"></th></tr>
+                    <tr><th className="p-3">Email</th><th className="p-3">Name</th><th className="p-3">Status</th><th className="p-3">Joined</th><th className="p-3"></th></tr>
                   </thead>
                   <tbody>
                     {pagedSubs.map((s) => (
                       <tr key={s.id} className="border-t border-border/60">
                         <td className="p-3">{s.email}</td>
                         <td className="p-3 text-muted-foreground">{s.name || "—"}</td>
+                        <td className="p-3">
+                          {s.unsubscribed_at ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-destructive/15 text-destructive">Unsubscribed</span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Active</span>
+                          )}
+                        </td>
                         <td className="p-3 text-muted-foreground">{new Date(s.created_at).toLocaleDateString()}</td>
-                        <td className="p-3 text-right"><button onClick={() => removeSub(s.id)} className="text-destructive hover:underline text-xs">Remove</button></td>
+                        <td className="p-3 text-right whitespace-nowrap">
+                          <button onClick={() => toggleSuppressed(s)} className="text-xs hover:underline mr-3">
+                            {s.unsubscribed_at ? "Re-subscribe" : "Unsubscribe"}
+                          </button>
+                          <button onClick={() => removeSub(s.id)} className="text-destructive hover:underline text-xs">Remove</button>
+                        </td>
                       </tr>
                     ))}
-                    {filteredSubs.length === 0 && <tr><td className="p-6 text-center text-muted-foreground" colSpan={4}>No subscribers match.</td></tr>}
+                    {filteredSubs.length === 0 && <tr><td className="p-6 text-center text-muted-foreground" colSpan={5}>No subscribers match.</td></tr>}
                   </tbody>
                 </table>
               </div>
