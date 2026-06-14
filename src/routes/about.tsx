@@ -120,10 +120,10 @@ function About() {
         <div className="absolute inset-0 -z-10 gradient-brand" />
         <div className="mx-auto max-w-7xl px-5 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-white text-center">
           {[
-            { v: 12500, s: "+", l: "Students" },
-            { v: 120, s: "+", l: "Courses" },
-            { v: 8500, s: "+", l: "Creatives" },
-            { v: 24, s: "", l: "Countries" },
+            { v: 2026, s: "", l: "Year founded" },
+            { v: 10, s: "+", l: "Courses launching" },
+            { v: 2, s: "", l: "Countries" },
+            { v: 3, s: "+", l: "Partner orgs" },
           ].map((s) => (
             <div key={s.l}>
               <div className="font-display font-extrabold text-4xl sm:text-5xl"><Counter value={s.v} suffix={s.s} /></div>
