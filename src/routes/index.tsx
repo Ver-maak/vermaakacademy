@@ -13,6 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-waves.jpg";
 import logo from "@/assets/vermaak-logo.png";
+import zimbaLogo from "@/assets/zimba-women.png.asset.json";
+import nemaniLogo from "@/assets/nemani.avif.asset.json";
+import swedoLogo from "@/assets/swedo.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,11 +42,12 @@ const categoryIcons = [
   { name: "AI & Emerging Tech", icon: Brain },
 ];
 
-const stats = [
-  { value: 12500, suffix: "+", label: "Students trained" },
-  { value: 120, suffix: "+", label: "Premium courses" },
-  { value: 8500, suffix: "+", label: "Creatives impacted" },
-  { value: 24, suffix: "", label: "Countries reached" },
+type Stat = { value: number; suffix?: string; label: string };
+const initialStats: Stat[] = [
+  { value: 0, suffix: "+", label: "Students enrolled" },
+  { value: 0, suffix: "+", label: "Active courses" },
+  { value: 0, suffix: "+", label: "Partner organisations" },
+  { value: 2, suffix: "", label: "Countries reached" },
 ];
 
 const whyItems = [
@@ -57,6 +61,7 @@ function Home() {
   const [featured, setFeatured] = useState<CourseCardData[]>([]);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [enrollFor, setEnrollFor] = useState<CourseCardData | null>(null);
+  const [stats, setStats] = useState<Stat[]>(initialStats);
 
   useEffect(() => {
     supabase
@@ -64,8 +69,25 @@ function Home() {
       .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating")
       .eq("published", true)
       .eq("featured", true)
+      .order("pinned", { ascending: false })
+      .order("pinned_at", { ascending: false, nullsFirst: false })
+      .order("created_at", { ascending: false })
       .limit(6)
       .then(({ data }) => setFeatured((data as CourseCardData[]) ?? []));
+
+    (async () => {
+      const [enrollRes, courseRes, partnerRes] = await Promise.all([
+        supabase.from("course_enrollments").select("*", { count: "exact", head: true }).eq("status", "enrolled"),
+        supabase.from("courses").select("*", { count: "exact", head: true }).eq("published", true),
+        supabase.from("partner_inquiries").select("*", { count: "exact", head: true }).eq("status", "active"),
+      ]);
+      setStats([
+        { value: enrollRes.count ?? 0, suffix: "+", label: "Students enrolled" },
+        { value: courseRes.count ?? 0, suffix: "+", label: "Active courses" },
+        { value: partnerRes.count ?? 0, suffix: "+", label: "Partner organisations" },
+        { value: 2, suffix: "", label: "Countries reached" },
+      ]);
+    })();
   }, []);
 
   return (
@@ -81,16 +103,6 @@ function Home() {
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-[var(--cyan)]/20 blur-[120px] -z-10" />
 
         <div className="mx-auto max-w-7xl px-5 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs font-medium mb-8"
-          >
-            <span className="h-2 w-2 rounded-full bg-[var(--cyan)] animate-pulse" />
-            New cohort starting · April 2026
-          </motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -251,10 +263,16 @@ function Home() {
       {/* Partners */}
       <section className="py-16 border-y border-border/60 bg-secondary/30">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <p className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground mb-8">Trusted by partners across Africa</p>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-8 items-center">
-            {["Andela", "Flutterwave", "MEST", "iHub", "Kuda", "Paystack"].map((p) => (
-              <div key={p} className="text-center font-display font-bold text-lg text-muted-foreground/70 hover:text-foreground transition">{p}</div>
+          <p className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground mb-10">Trusted by partners across Africa</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 items-center max-w-4xl mx-auto">
+            {[
+              { name: "Zimba Women", src: zimbaLogo.url },
+              { name: "Nemani Microcredit", src: nemaniLogo.url },
+              { name: "SWEDO", src: swedoLogo.url },
+            ].map((p) => (
+              <div key={p.name} className="flex items-center justify-center h-24 bg-card rounded-2xl border border-border/60 p-4">
+                <img src={p.src} alt={p.name} loading="lazy" className="max-h-full max-w-full object-contain" />
+              </div>
             ))}
           </div>
         </div>

@@ -50,8 +50,8 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold mb-4">Contact</h4>
           <ul className="space-y-2.5 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> hello@vermaak.academy</li>
-            <li>Lagos · Nairobi · Cape Town</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href="mailto:vermaakinc1@gmail.com" className="hover:text-foreground">vermaakinc1@gmail.com</a></li>
+            <li>Kampala · Nairobi</li>
           </ul>
         </div>
       </div>

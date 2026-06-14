@@ -16,36 +16,63 @@ export type Database = {
     Tables: {
       course_enrollments: {
         Row: {
+          age_range: string | null
+          city: string | null
+          country: string | null
           course_id: string | null
           course_title: string
           created_at: string
+          education_level: string | null
           email: string
+          experience_level: string | null
+          gender: string | null
+          heard_from: string | null
           id: string
           motivation: string
           name: string
+          occupation: string | null
           phone: string
+          preferred_schedule: string | null
           status: string
         }
         Insert: {
+          age_range?: string | null
+          city?: string | null
+          country?: string | null
           course_id?: string | null
           course_title?: string
           created_at?: string
+          education_level?: string | null
           email: string
+          experience_level?: string | null
+          gender?: string | null
+          heard_from?: string | null
           id?: string
           motivation?: string
           name: string
+          occupation?: string | null
           phone?: string
+          preferred_schedule?: string | null
           status?: string
         }
         Update: {
+          age_range?: string | null
+          city?: string | null
+          country?: string | null
           course_id?: string | null
           course_title?: string
           created_at?: string
+          education_level?: string | null
           email?: string
+          experience_level?: string | null
+          gender?: string | null
+          heard_from?: string | null
           id?: string
           motivation?: string
           name?: string
+          occupation?: string | null
           phone?: string
+          preferred_schedule?: string | null
           status?: string
         }
         Relationships: [
@@ -61,48 +88,72 @@ export type Database = {
       courses: {
         Row: {
           category: string
+          certificate: string | null
           created_at: string
           description: string
           duration: string
           featured: boolean
+          full_description: string | null
           id: string
           instructor: string
           level: string
+          modules: Json
+          pinned: boolean
+          pinned_at: string | null
+          prerequisites: string | null
+          price: string | null
           published: boolean
           rating: number
           thumbnail_url: string | null
           title: string
           updated_at: string
+          what_you_learn: Json
         }
         Insert: {
           category?: string
+          certificate?: string | null
           created_at?: string
           description?: string
           duration?: string
           featured?: boolean
+          full_description?: string | null
           id?: string
           instructor?: string
           level?: string
+          modules?: Json
+          pinned?: boolean
+          pinned_at?: string | null
+          prerequisites?: string | null
+          price?: string | null
           published?: boolean
           rating?: number
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          what_you_learn?: Json
         }
         Update: {
           category?: string
+          certificate?: string | null
           created_at?: string
           description?: string
           duration?: string
           featured?: boolean
+          full_description?: string | null
           id?: string
           instructor?: string
           level?: string
+          modules?: Json
+          pinned?: boolean
+          pinned_at?: string | null
+          prerequisites?: string | null
+          price?: string | null
           published?: boolean
           rating?: number
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          what_you_learn?: Json
         }
         Relationships: []
       }
@@ -129,37 +180,64 @@ export type Database = {
       }
       partner_inquiries: {
         Row: {
+          budget_range: string | null
+          city: string | null
+          country: string | null
           created_at: string
           email: string
+          goals: string | null
           id: string
+          industry: string | null
           message: string
           name: string
           organization: string
+          organization_size: string | null
           partnership_type: string
           phone: string
+          role: string | null
           status: string
+          timeline: string | null
+          website: string | null
         }
         Insert: {
+          budget_range?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           email: string
+          goals?: string | null
           id?: string
+          industry?: string | null
           message?: string
           name: string
           organization?: string
+          organization_size?: string | null
           partnership_type?: string
           phone?: string
+          role?: string | null
           status?: string
+          timeline?: string | null
+          website?: string | null
         }
         Update: {
+          budget_range?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           email?: string
+          goals?: string | null
           id?: string
+          industry?: string | null
           message?: string
           name?: string
           organization?: string
+          organization_size?: string | null
           partnership_type?: string
           phone?: string
+          role?: string | null
           status?: string
+          timeline?: string | null
+          website?: string | null
         }
         Relationships: []
       }
