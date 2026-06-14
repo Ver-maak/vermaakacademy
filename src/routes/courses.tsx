@@ -30,6 +30,8 @@ type CourseRow = CourseCardData & {
   price?: string | null;
   what_you_learn?: string[] | null;
   modules?: Module[] | null;
+  registration_start?: string | null;
+  registration_end?: string | null;
 };
 
 const levels = ["All", "Beginner", "Intermediate", "Advanced"] as const;
