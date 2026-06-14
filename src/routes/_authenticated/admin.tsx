@@ -346,12 +346,31 @@ function Admin() {
     const { error } = await supabase.from("newsletter_subscribers").insert({ email, name });
     setAddingSub(false);
     if (error) {
-      if (error.code === "23505") return toast.error("Already subscribed");
+      if (error.code === "23505") {
+        // Re-activate if previously unsubscribed
+        const { data: existing } = await supabase.from("newsletter_subscribers").select("id,unsubscribed_at").eq("email", email).maybeSingle();
+        if (existing?.unsubscribed_at) {
+          const { error: upErr } = await supabase.from("newsletter_subscribers").update({ unsubscribed_at: null, name: name || undefined }).eq("id", existing.id);
+          if (upErr) return toast.error(upErr.message);
+          toast.success("Subscriber re-activated");
+          setNewSubEmail(""); setNewSubName(""); refresh();
+          return;
+        }
+        return toast.error("Already subscribed");
+      }
       return toast.error(error.message);
     }
     toast.success("Subscriber added");
     setNewSubEmail("");
     setNewSubName("");
+    refresh();
+  }
+
+  async function toggleSuppressed(s: Subscriber) {
+    const next = s.unsubscribed_at ? null : new Date().toISOString();
+    const { error } = await supabase.from("newsletter_subscribers").update({ unsubscribed_at: next }).eq("id", s.id);
+    if (error) return toast.error(error.message);
+    toast.success(next ? "Marked as unsubscribed" : "Re-subscribed");
     refresh();
   }
 
