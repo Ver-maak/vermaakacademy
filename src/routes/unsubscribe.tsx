@@ -74,8 +74,8 @@ function UnsubscribePage() {
           {state.kind === "invalid" && (
             <>
               <div className="mx-auto h-12 w-12 rounded-full bg-destructive/15 text-destructive grid place-items-center mb-4"><AlertCircle className="h-6 w-6" /></div>
-              <h1 className="font-display text-2xl font-bold">Invalid link</h1>
-              <p className="mt-2 text-sm text-muted-foreground">This unsubscribe link is invalid or has expired.</p>
+              <h1 className="font-display text-2xl font-bold">{token ? "Invalid link" : "Use your email link"}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{token ? "This unsubscribe link is invalid or has expired." : "Open the unsubscribe link from a Vermaak newsletter to opt out."}</p>
             </>
           )}
 
