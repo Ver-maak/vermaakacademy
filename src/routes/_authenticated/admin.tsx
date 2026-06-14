@@ -573,6 +573,28 @@ function Admin() {
                   <input placeholder="Prerequisites" value={form.prerequisites ?? ""} onChange={(e) => setForm({ ...form, prerequisites: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
                   <input placeholder="Certificate info (e.g. Certificate on completion)" value={form.certificate ?? ""} onChange={(e) => setForm({ ...form, certificate: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
 
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registration opens (optional)</label>
+                      <input
+                        type="date"
+                        value={form.registration_start ? form.registration_start.slice(0, 10) : ""}
+                        onChange={(e) => setForm({ ...form, registration_start: e.target.value || null })}
+                        className="mt-1 w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registration closes (optional)</label>
+                      <input
+                        type="date"
+                        value={form.registration_end ? form.registration_end.slice(0, 10) : ""}
+                        onChange={(e) => setForm({ ...form, registration_end: e.target.value || null })}
+                        className="mt-1 w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground -mt-1">Leave both empty for open registration.</p>
+
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">What you'll learn</label>
