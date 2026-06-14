@@ -61,6 +61,8 @@ const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   price: "",
   what_you_learn: [],
   modules: [],
+  registration_start: null,
+  registration_end: null,
 };
 
 type Tab = "courses" | "enrollments" | "partners" | "subscribers";
