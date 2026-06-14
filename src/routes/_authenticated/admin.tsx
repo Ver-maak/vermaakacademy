@@ -208,12 +208,12 @@ function Admin() {
       supabase.from("courses").select("*").order("created_at", { ascending: false }),
       supabase.from("newsletter_subscribers").select("id,email,name,created_at").order("created_at", { ascending: false }),
       supabase.from("partner_inquiries").select("*").order("created_at", { ascending: false }),
-      supabase.from("course_enrollments").select("id,course_title,name,email,phone,motivation,status,created_at").order("created_at", { ascending: false }),
+      supabase.from("course_enrollments").select("*").order("created_at", { ascending: false }),
     ]);
-    setCourses((c as CourseRow[]) ?? []);
+    setCourses((c as unknown as CourseRow[]) ?? []);
     setSubs(s ?? []);
-    setPartners((p as Partner[]) ?? []);
-    setEnrollments((e as Enrollment[]) ?? []);
+    setPartners((p as unknown as Partner[]) ?? []);
+    setEnrollments((e as unknown as Enrollment[]) ?? []);
   }
 
   useEffect(() => {
