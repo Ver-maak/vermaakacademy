@@ -39,7 +39,7 @@ type CourseRow = {
   registration_end: string | null;
 };
 
-type Subscriber = { id: string; email: string; name: string; created_at: string };
+type Subscriber = { id: string; email: string; name: string; created_at: string; unsubscribed_at: string | null; unsubscribe_token: string };
 type Partner = { id: string; name: string; organization: string; email: string; phone: string; partnership_type: string; message: string; status: string; created_at: string; role?: string; website?: string; country?: string; city?: string; organization_size?: string; industry?: string; budget_range?: string; timeline?: string; goals?: string };
 type Enrollment = { id: string; course_title: string; name: string; email: string; phone: string; motivation: string; status: string; created_at: string; country?: string; city?: string; age_range?: string; gender?: string; occupation?: string; education_level?: string; experience_level?: string; preferred_schedule?: string; heard_from?: string };
 
