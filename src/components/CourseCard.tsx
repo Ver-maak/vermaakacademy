@@ -50,8 +50,7 @@ export function CourseCard({ course, onClick }: { course: CourseCardData; onClic
           <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {course.duration}</span>
           <span className="flex items-center gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> {course.level}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-foreground/80">by {course.instructor}</span>
+        <div className="flex items-center justify-end">
           <Button size="sm" variant="brand" onClick={onClick}>Enroll</Button>
         </div>
       </div>
