@@ -61,6 +61,7 @@ export function Footer() {
           <div className="flex gap-5">
             <a href="#" className="hover:text-foreground">Privacy</a>
             <a href="#" className="hover:text-foreground">Terms</a>
+            <Link to="/unsubscribe" className="hover:text-foreground">Unsubscribe</Link>
           </div>
         </div>
       </div>
