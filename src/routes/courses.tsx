@@ -51,7 +51,7 @@ function Courses() {
   useEffect(() => {
     supabase
       .from("courses")
-      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,featured,pinned,full_description,prerequisites,certificate,price,what_you_learn,modules")
+      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,featured,pinned,full_description,prerequisites,certificate,price,what_you_learn,modules,registration_start,registration_end")
       .eq("published", true)
       .order("pinned", { ascending: false })
       .order("created_at", { ascending: false })
