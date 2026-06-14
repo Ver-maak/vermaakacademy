@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { CourseCard, type CourseCardData } from "@/components/CourseCard";
+import { CourseDetailsModal, type CourseDetails } from "@/components/CourseDetailsModal";
 import { Counter } from "@/components/Counter";
 import { PartnerForm } from "@/components/PartnerForm";
 import { EnrollForm } from "@/components/EnrollForm";
@@ -58,22 +59,23 @@ const whyItems = [
 ];
 
 function Home() {
-  const [featured, setFeatured] = useState<CourseCardData[]>([]);
+  const [featured, setFeatured] = useState<CourseDetails[]>([]);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [enrollFor, setEnrollFor] = useState<CourseCardData | null>(null);
+  const [details, setDetails] = useState<CourseDetails | null>(null);
   const [stats, setStats] = useState<Stat[]>(initialStats);
 
   useEffect(() => {
     supabase
       .from("courses")
-      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating")
+      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,full_description,prerequisites,certificate,price,what_you_learn,modules")
       .eq("published", true)
       .eq("featured", true)
       .order("pinned", { ascending: false })
       .order("pinned_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(6)
-      .then(({ data }) => setFeatured((data as CourseCardData[]) ?? []));
+      .then(({ data }) => setFeatured((data as CourseDetails[]) ?? []));
 
     (async () => {
       const [enrollRes, courseRes, partnerRes] = await Promise.all([
@@ -190,7 +192,7 @@ function Home() {
             <p className="mt-3 text-muted-foreground">Real projects, real mentors, real outcomes.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((c) => <CourseCard key={c.id} course={c} onClick={() => setEnrollFor(c)} />)}
+            {featured.map((c) => <CourseCard key={c.id} course={c} onClick={() => setDetails(c)} />)}
           </div>
         </div>
       </section>
@@ -305,6 +307,7 @@ function Home() {
       </section>
 
       <PartnerForm open={partnerOpen} onClose={() => setPartnerOpen(false)} />
+      <CourseDetailsModal course={details} onClose={() => setDetails(null)} onEnroll={(c) => { setEnrollFor(c); setDetails(null); }} />
       <EnrollForm open={!!enrollFor} onClose={() => setEnrollFor(null)} course={enrollFor ? { id: enrollFor.id, title: enrollFor.title } : null} />
 
       <Footer />
