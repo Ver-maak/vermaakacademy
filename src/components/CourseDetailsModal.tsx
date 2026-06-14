@@ -104,11 +104,7 @@ export function CourseDetailsModal({
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-border/60 flex items-center justify-between">
-            <div>
-              <p className="text-xs text-muted-foreground">Instructor</p>
-              <p className="font-semibold">{course.instructor}</p>
-            </div>
+          <div className="mt-6 pt-6 border-t border-border/60 flex items-center justify-end">
             <Button size="lg" variant="brand" onClick={() => onEnroll(course)}>Enroll Now</Button>
           </div>
         </div>
