@@ -35,6 +35,8 @@ type CourseRow = {
   price: string | null;
   what_you_learn: string[];
   modules: Module[];
+  registration_start: string | null;
+  registration_end: string | null;
 };
 
 type Subscriber = { id: string; email: string; name: string; created_at: string };
