@@ -834,6 +834,27 @@ function Admin() {
                   ]}
                 />
               </SearchBar>
+              <form onSubmit={addSubscriber} className="mb-4 grid sm:grid-cols-[1fr_1fr_auto] gap-2">
+                <input
+                  type="email"
+                  required
+                  value={newSubEmail}
+                  onChange={(e) => setNewSubEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  maxLength={255}
+                  className="h-10 px-3 rounded-lg bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+                />
+                <input
+                  value={newSubName}
+                  onChange={(e) => setNewSubName(e.target.value)}
+                  placeholder="Name (optional)"
+                  maxLength={120}
+                  className="h-10 px-3 rounded-lg bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+                />
+                <button type="submit" disabled={addingSub} className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                  {addingSub ? "Adding…" : "Add subscriber"}
+                </button>
+              </form>
               <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary/40 text-left">
