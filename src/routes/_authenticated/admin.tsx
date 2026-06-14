@@ -284,13 +284,18 @@ function Admin() {
     e.preventDefault();
     setBusy(true);
     try {
+      const normalized = {
+        ...form,
+        registration_start: form.registration_start ? form.registration_start : null,
+        registration_end: form.registration_end ? form.registration_end : null,
+      };
       if (editing) {
-        const payload = { ...form, pinned_at: form.pinned ? (editing.pinned_at ?? new Date().toISOString()) : null };
+        const payload = { ...normalized, pinned_at: form.pinned ? (editing.pinned_at ?? new Date().toISOString()) : null };
         const { error } = await supabase.from("courses").update(payload).eq("id", editing.id);
         if (error) throw error;
         toast.success("Course updated");
       } else {
-        const payload = { ...form, pinned_at: form.pinned ? new Date().toISOString() : null };
+        const payload = { ...normalized, pinned_at: form.pinned ? new Date().toISOString() : null };
         const { error } = await supabase.from("courses").insert(payload);
         if (error) throw error;
         toast.success("Course created");
