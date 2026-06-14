@@ -106,11 +106,6 @@ function Home() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl leading-[1.05] max-w-4xl mx-auto"
           >
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl leading-[1.05] max-w-4xl mx-auto"
-          >
             Learn the skills <br className="hidden sm:block" />
             shaping <span className="gradient-text">Africa's future</span>.
           </motion.h1>
