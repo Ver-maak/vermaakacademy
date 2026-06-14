@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -259,6 +259,14 @@ function Admin() {
       .eq("id", c.id);
     if (error) return toast.error(error.message);
     toast.success(next ? "Course pinned to top" : "Course unpinned");
+    refresh();
+  }
+
+  async function togglePublished(c: CourseRow) {
+    const next = !c.published;
+    const { error } = await supabase.from("courses").update({ published: next }).eq("id", c.id);
+    if (error) return toast.error(error.message);
+    toast.success(next ? "Course published" : "Course unpublished");
     refresh();
   }
 
@@ -521,6 +529,14 @@ function Admin() {
                           className={`h-9 w-9 rounded-full inline-flex items-center justify-center ${c.pinned ? "bg-[var(--cyan)]/15 text-[var(--ocean)] hover:bg-[var(--cyan)]/25" : "hover:bg-secondary"}`}
                         >
                           {c.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                        </button>
+                        <button
+                          onClick={() => togglePublished(c)}
+                          title={c.published ? "Unpublish" : "Publish"}
+                          aria-label={c.published ? "Unpublish course" : "Publish course"}
+                          className={`h-9 w-9 rounded-full inline-flex items-center justify-center ${c.published ? "hover:bg-secondary" : "bg-destructive/10 text-destructive hover:bg-destructive/20"}`}
+                        >
+                          {c.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                         </button>
                         <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
                         <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
