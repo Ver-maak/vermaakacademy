@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -12,6 +12,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Vermaak Academy" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Admin,
 });
+
+type Module = { title: string; description: string };
 
 type CourseRow = {
   id: string;
@@ -25,13 +27,21 @@ type CourseRow = {
   rating: number;
   featured: boolean;
   published: boolean;
+  pinned: boolean;
+  pinned_at: string | null;
+  full_description: string | null;
+  prerequisites: string | null;
+  certificate: string | null;
+  price: string | null;
+  what_you_learn: string[];
+  modules: Module[];
 };
 
 type Subscriber = { id: string; email: string; name: string; created_at: string };
-type Partner = { id: string; name: string; organization: string; email: string; phone: string; partnership_type: string; message: string; status: string; created_at: string };
-type Enrollment = { id: string; course_title: string; name: string; email: string; phone: string; motivation: string; status: string; created_at: string };
+type Partner = { id: string; name: string; organization: string; email: string; phone: string; partnership_type: string; message: string; status: string; created_at: string; role?: string; website?: string; country?: string; city?: string; organization_size?: string; industry?: string; budget_range?: string; timeline?: string; goals?: string };
+type Enrollment = { id: string; course_title: string; name: string; email: string; phone: string; motivation: string; status: string; created_at: string; country?: string; city?: string; age_range?: string; gender?: string; occupation?: string; education_level?: string; experience_level?: string; preferred_schedule?: string; heard_from?: string };
 
-const emptyForm: Omit<CourseRow, "id"> = {
+const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   title: "",
   description: "",
   thumbnail_url: "",
@@ -42,6 +52,13 @@ const emptyForm: Omit<CourseRow, "id"> = {
   rating: 4.8,
   featured: false,
   published: true,
+  pinned: false,
+  full_description: "",
+  prerequisites: "",
+  certificate: "",
+  price: "",
+  what_you_learn: [],
+  modules: [],
 };
 
 type Tab = "courses" | "enrollments" | "partners" | "subscribers";
