@@ -59,22 +59,23 @@ const whyItems = [
 ];
 
 function Home() {
-  const [featured, setFeatured] = useState<CourseCardData[]>([]);
+  const [featured, setFeatured] = useState<CourseDetails[]>([]);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [enrollFor, setEnrollFor] = useState<CourseCardData | null>(null);
+  const [details, setDetails] = useState<CourseDetails | null>(null);
   const [stats, setStats] = useState<Stat[]>(initialStats);
 
   useEffect(() => {
     supabase
       .from("courses")
-      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating")
+      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,full_description,prerequisites,certificate,price,what_you_learn,modules")
       .eq("published", true)
       .eq("featured", true)
       .order("pinned", { ascending: false })
       .order("pinned_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
       .limit(6)
-      .then(({ data }) => setFeatured((data as CourseCardData[]) ?? []));
+      .then(({ data }) => setFeatured((data as CourseDetails[]) ?? []));
 
     (async () => {
       const [enrollRes, courseRes, partnerRes] = await Promise.all([
