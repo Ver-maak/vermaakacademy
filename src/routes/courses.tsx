@@ -20,7 +20,17 @@ export const Route = createFileRoute("/courses")({
   component: Courses,
 });
 
-type CourseRow = CourseCardData & { featured: boolean };
+type Module = { title: string; description?: string };
+type CourseRow = CourseCardData & {
+  featured: boolean;
+  pinned?: boolean;
+  full_description?: string | null;
+  prerequisites?: string | null;
+  certificate?: string | null;
+  price?: string | null;
+  what_you_learn?: string[] | null;
+  modules?: Module[] | null;
+};
 
 const levels = ["All", "Beginner", "Intermediate", "Advanced"] as const;
 const sorts = ["Featured", "Top Rated", "Shortest"] as const;
@@ -39,8 +49,9 @@ function Courses() {
   useEffect(() => {
     supabase
       .from("courses")
-      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,featured")
+      .select("id,title,description,thumbnail_url,instructor,duration,category,level,rating,featured,pinned,full_description,prerequisites,certificate,price,what_you_learn,modules")
       .eq("published", true)
+      .order("pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
         if (!error && data) setData(data as CourseRow[]);
@@ -59,7 +70,11 @@ function Courses() {
     });
     if (sort === "Top Rated") r = [...r].sort((a, b) => b.rating - a.rating);
     if (sort === "Shortest") r = [...r].sort((a, b) => parseInt(a.duration) - parseInt(b.duration));
-    if (sort === "Featured") r = [...r].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+    if (sort === "Featured") r = [...r].sort((a, b) => {
+      const pin = Number(!!b.pinned) - Number(!!a.pinned);
+      if (pin !== 0) return pin;
+      return Number(!!b.featured) - Number(!!a.featured);
+    });
     return r;
   }, [data, q, cat, level, sort]);
 
