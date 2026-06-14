@@ -645,6 +645,18 @@ function Admin() {
                           <a href={`mailto:${e.email}`} className="hover:text-foreground">{e.email}</a>
                           {e.phone && <> · {e.phone}</>}
                         </div>
+                        {(e.country || e.city || e.age_range || e.gender || e.occupation || e.education_level || e.experience_level || e.preferred_schedule || e.heard_from) && (
+                          <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
+                            {[
+                              [e.city, e.country].filter(Boolean).join(", "),
+                              e.age_range, e.gender, e.occupation, e.education_level,
+                              e.experience_level && `Exp: ${e.experience_level}`,
+                              e.preferred_schedule, e.heard_from && `Heard via: ${e.heard_from}`,
+                            ].filter(Boolean).map((t, i) => (
+                              <span key={i} className="px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{t}</span>
+                            ))}
+                          </div>
+                        )}
                         {e.motivation && <p className="text-sm mt-3 max-w-2xl">{e.motivation}</p>}
                         <p className="text-xs text-muted-foreground mt-2">Received {new Date(e.created_at).toLocaleString()}</p>
                       </div>
