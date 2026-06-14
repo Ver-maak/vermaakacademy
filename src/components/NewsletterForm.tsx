@@ -12,11 +12,26 @@ export function NewsletterForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.from("newsletter_subscribers").insert({ email: email.trim(), name: name.trim() });
+    const cleanEmail = email.trim();
+    const cleanName = name.trim();
+    const { error } = await supabase.from("newsletter_subscribers").insert({ email: cleanEmail, name: cleanName });
+    if (error && error.code === "23505") {
+      // Re-subscribe if previously unsubscribed
+      const { data: existing } = await supabase.from("newsletter_subscribers").select("id,unsubscribed_at").eq("email", cleanEmail).maybeSingle();
+      if (existing?.unsubscribed_at) {
+        const { error: upErr } = await supabase.from("newsletter_subscribers").update({ unsubscribed_at: null, name: cleanName || undefined }).eq("id", existing.id);
+        setBusy(false);
+        if (upErr) return toast.error(upErr.message);
+        toast.success("Welcome back! You're subscribed again.");
+        setEmail(""); setName("");
+        return;
+      }
+      setBusy(false);
+      return toast.error("You're already subscribed.");
+    }
     setBusy(false);
     if (error) {
-      if (error.code === "23505") toast.error("You're already subscribed.");
-      else toast.error(error.message || "Could not subscribe. Try again.");
+      toast.error(error.message || "Could not subscribe. Try again.");
       return;
     }
     toast.success("You're in! Welcome to Vermaak.");
