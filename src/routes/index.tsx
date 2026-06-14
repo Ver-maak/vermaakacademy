@@ -192,7 +192,7 @@ function Home() {
             <p className="mt-3 text-muted-foreground">Real projects, real mentors, real outcomes.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((c) => <CourseCard key={c.id} course={c} onClick={() => setEnrollFor(c)} />)}
+            {featured.map((c) => <CourseCard key={c.id} course={c} onClick={() => setDetails(c)} />)}
           </div>
         </div>
       </section>
