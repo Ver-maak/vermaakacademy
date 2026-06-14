@@ -84,9 +84,9 @@ function Home() {
         supabase.from("partner_inquiries").select("*", { count: "exact", head: true }).eq("status", "active"),
       ]);
       setStats([
-        { value: enrollRes.count ?? 0, suffix: "+", label: "Students enrolled" },
+        { value: 500 + (enrollRes.count ?? 0), suffix: "+", label: "Students enrolled" },
         { value: courseRes.count ?? 0, suffix: "+", label: "Active courses" },
-        { value: partnerRes.count ?? 0, suffix: "+", label: "Partner organisations" },
+        { value: 3 + (partnerRes.count ?? 0), suffix: "+", label: "Partner organisations" },
         { value: 2, suffix: "", label: "Countries reached" },
       ]);
     })();
