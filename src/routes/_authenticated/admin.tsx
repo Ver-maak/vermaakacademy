@@ -233,8 +233,27 @@ function Admin() {
 
   function startEdit(c: CourseRow) {
     setEditing(c);
-    const { id: _id, ...rest } = c;
-    setForm(rest);
+    const { id: _id, pinned_at: _pa, ...rest } = c;
+    setForm({
+      ...rest,
+      full_description: rest.full_description ?? "",
+      prerequisites: rest.prerequisites ?? "",
+      certificate: rest.certificate ?? "",
+      price: rest.price ?? "",
+      what_you_learn: Array.isArray(rest.what_you_learn) ? rest.what_you_learn : [],
+      modules: Array.isArray(rest.modules) ? rest.modules : [],
+    });
+  }
+
+  async function togglePin(c: CourseRow) {
+    const next = !c.pinned;
+    const { error } = await supabase
+      .from("courses")
+      .update({ pinned: next, pinned_at: next ? new Date().toISOString() : null })
+      .eq("id", c.id);
+    if (error) return toast.error(error.message);
+    toast.success(next ? "Course pinned to top" : "Course unpinned");
+    refresh();
   }
 
   async function uploadThumb(file: File) {
@@ -260,11 +279,13 @@ function Admin() {
     setBusy(true);
     try {
       if (editing) {
-        const { error } = await supabase.from("courses").update(form).eq("id", editing.id);
+        const payload = { ...form, pinned_at: form.pinned ? (editing.pinned_at ?? new Date().toISOString()) : null };
+        const { error } = await supabase.from("courses").update(payload).eq("id", editing.id);
         if (error) throw error;
         toast.success("Course updated");
       } else {
-        const { error } = await supabase.from("courses").insert(form);
+        const payload = { ...form, pinned_at: form.pinned ? new Date().toISOString() : null };
+        const { error } = await supabase.from("courses").insert(payload);
         if (error) throw error;
         toast.success("Course created");
       }
