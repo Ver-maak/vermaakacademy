@@ -530,6 +530,14 @@ function Admin() {
                         >
                           {c.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
                         </button>
+                        <button
+                          onClick={() => togglePublished(c)}
+                          title={c.published ? "Unpublish" : "Publish"}
+                          aria-label={c.published ? "Unpublish course" : "Publish course"}
+                          className={`h-9 w-9 rounded-full inline-flex items-center justify-center ${c.published ? "hover:bg-secondary" : "bg-destructive/10 text-destructive hover:bg-destructive/20"}`}
+                        >
+                          {c.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                        </button>
                         <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
                         <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
                       </div>
