@@ -169,18 +169,24 @@ export type Database = {
           email: string
           id: string
           name: string
+          unsubscribe_token: string
+          unsubscribed_at: string | null
         }
         Insert: {
           created_at?: string
           email: string
           id?: string
           name?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
         }
         Update: {
           created_at?: string
           email?: string
           id?: string
           name?: string
+          unsubscribe_token?: string
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }
@@ -273,12 +279,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_subscriber_by_token: {
+        Args: { _token: string }
+        Returns: {
+          already_unsubscribed: boolean
+          email: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      unsubscribe_newsletter: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          success: boolean
+        }[]
       }
     }
     Enums: {
