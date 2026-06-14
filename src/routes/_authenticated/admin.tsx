@@ -333,6 +333,28 @@ function Admin() {
     refresh();
   }
 
+  const [newSubEmail, setNewSubEmail] = useState("");
+  const [newSubName, setNewSubName] = useState("");
+  const [addingSub, setAddingSub] = useState(false);
+  async function addSubscriber(e: React.FormEvent) {
+    e.preventDefault();
+    const email = newSubEmail.trim();
+    const name = newSubName.trim();
+    if (!email) return toast.error("Email is required");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast.error("Invalid email");
+    setAddingSub(true);
+    const { error } = await supabase.from("newsletter_subscribers").insert({ email, name });
+    setAddingSub(false);
+    if (error) {
+      if (error.code === "23505") return toast.error("Already subscribed");
+      return toast.error(error.message);
+    }
+    toast.success("Subscriber added");
+    setNewSubEmail("");
+    setNewSubName("");
+    refresh();
+  }
+
   async function setPartnerStatus(id: string, status: string) {
     const { error } = await supabase.from("partner_inquiries").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
