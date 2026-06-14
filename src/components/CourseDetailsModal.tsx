@@ -19,7 +19,26 @@ export type CourseDetails = {
   price?: string | null;
   what_you_learn?: string[] | null;
   modules?: Module[] | null;
+  registration_start?: string | null;
+  registration_end?: string | null;
 };
+
+function fmtDate(iso?: string | null) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+}
+
+function registrationStatus(start?: string | null, end?: string | null) {
+  const s = start ? new Date(start) : null;
+  const e = end ? new Date(end) : null;
+  const now = new Date();
+  if (!s && !e) return { label: "Open registration", tone: "open" as const, detail: "Enrol any time" };
+  if (s && now < s) return { label: "Registration opens soon", tone: "soon" as const, detail: `Opens ${fmtDate(start)}${e ? ` · closes ${fmtDate(end)}` : ""}` };
+  if (e && now > e) return { label: "Registration closed", tone: "closed" as const, detail: `Closed on ${fmtDate(end)}` };
+  return { label: "Registration open", tone: "open" as const, detail: `${s ? `Opened ${fmtDate(start)}` : "Open now"}${e ? ` · closes ${fmtDate(end)}` : ""}` };
+}
 
 export function CourseDetailsModal({
   course,
