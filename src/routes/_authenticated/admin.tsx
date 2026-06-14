@@ -205,7 +205,7 @@ function Admin() {
 
   async function refresh() {
     const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
-      supabase.from("courses").select("*").order("created_at", { ascending: false }),
+      supabase.from("courses").select("*").order("pinned", { ascending: false }).order("pinned_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
       supabase.from("newsletter_subscribers").select("id,email,name,created_at").order("created_at", { ascending: false }),
       supabase.from("partner_inquiries").select("*").order("created_at", { ascending: false }),
       supabase.from("course_enrollments").select("*").order("created_at", { ascending: false }),
