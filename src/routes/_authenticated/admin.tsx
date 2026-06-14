@@ -333,6 +333,28 @@ function Admin() {
     refresh();
   }
 
+  const [newSubEmail, setNewSubEmail] = useState("");
+  const [newSubName, setNewSubName] = useState("");
+  const [addingSub, setAddingSub] = useState(false);
+  async function addSubscriber(e: React.FormEvent) {
+    e.preventDefault();
+    const email = newSubEmail.trim();
+    const name = newSubName.trim();
+    if (!email) return toast.error("Email is required");
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast.error("Invalid email");
+    setAddingSub(true);
+    const { error } = await supabase.from("newsletter_subscribers").insert({ email, name });
+    setAddingSub(false);
+    if (error) {
+      if (error.code === "23505") return toast.error("Already subscribed");
+      return toast.error(error.message);
+    }
+    toast.success("Subscriber added");
+    setNewSubEmail("");
+    setNewSubName("");
+    refresh();
+  }
+
   async function setPartnerStatus(id: string, status: string) {
     const { error } = await supabase.from("partner_inquiries").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
@@ -812,6 +834,27 @@ function Admin() {
                   ]}
                 />
               </SearchBar>
+              <form onSubmit={addSubscriber} className="mb-4 grid sm:grid-cols-[1fr_1fr_auto] gap-2">
+                <input
+                  type="email"
+                  required
+                  value={newSubEmail}
+                  onChange={(e) => setNewSubEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  maxLength={255}
+                  className="h-10 px-3 rounded-lg bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+                />
+                <input
+                  value={newSubName}
+                  onChange={(e) => setNewSubName(e.target.value)}
+                  placeholder="Name (optional)"
+                  maxLength={120}
+                  className="h-10 px-3 rounded-lg bg-background border border-border text-sm outline-none focus:ring-2 focus:ring-[var(--cyan)]"
+                />
+                <button type="submit" disabled={addingSub} className="h-10 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                  {addingSub ? "Adding…" : "Add subscriber"}
+                </button>
+              </form>
               <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead className="bg-secondary/40 text-left">
