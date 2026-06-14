@@ -249,9 +249,31 @@ function Courses() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-border/60 flex items-center justify-end">
-                <Button size="lg" variant="brand" onClick={() => { setEnrollFor(active); setActive(null); }}>Enroll Now</Button>
-              </div>
+              {(() => {
+                const s = active.registration_start ? new Date(active.registration_start) : null;
+                const e = active.registration_end ? new Date(active.registration_end) : null;
+                const now = new Date();
+                const fmt = (d: Date) => d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+                let label = "Open registration";
+                let detail = "Enrol any time";
+                let tone: "open" | "soon" | "closed" = "open";
+                if (s && now < s) { tone = "soon"; label = "Registration opens soon"; detail = `Opens ${fmt(s)}${e ? ` · closes ${fmt(e)}` : ""}`; }
+                else if (e && now > e) { tone = "closed"; label = "Registration closed"; detail = `Closed on ${fmt(e)}`; }
+                else if (s || e) { detail = `${s ? `Opened ${fmt(s)}` : "Open now"}${e ? ` · closes ${fmt(e)}` : ""}`; label = "Registration open"; }
+                const toneCls = tone === "open" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" : tone === "soon" ? "bg-amber-500/10 text-amber-600 border-amber-500/30" : "bg-destructive/10 text-destructive border-destructive/30";
+                const disabled = tone === "closed";
+                return (
+                  <div className="mt-6 pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className={`inline-flex flex-col px-3 py-2 rounded-lg border text-xs ${toneCls}`}>
+                      <span className="font-semibold uppercase tracking-wider">{label}</span>
+                      <span className="opacity-80">{detail}</span>
+                    </div>
+                    <Button size="lg" variant="brand" disabled={disabled} onClick={() => { if (!disabled) { setEnrollFor(active); setActive(null); } }}>
+                      {disabled ? "Registration closed" : "Enroll Now"}
+                    </Button>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
