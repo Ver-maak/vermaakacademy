@@ -13,6 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import heroImg from "@/assets/hero-waves.jpg";
 import logo from "@/assets/vermaak-logo.png";
+import zimbaLogo from "@/assets/zimba-women.png.asset.json";
+import nemaniLogo from "@/assets/nemani.avif.asset.json";
+import swedoLogo from "@/assets/swedo.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -260,10 +263,16 @@ function Home() {
       {/* Partners */}
       <section className="py-16 border-y border-border/60 bg-secondary/30">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          <p className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground mb-8">Trusted by partners across Africa</p>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-8 items-center">
-            {["Andela", "Flutterwave", "MEST", "iHub", "Kuda", "Paystack"].map((p) => (
-              <div key={p} className="text-center font-display font-bold text-lg text-muted-foreground/70 hover:text-foreground transition">{p}</div>
+          <p className="text-center text-xs uppercase tracking-[0.25em] text-muted-foreground mb-10">Trusted by partners across Africa</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 items-center max-w-4xl mx-auto">
+            {[
+              { name: "Zimba Women", src: zimbaLogo.url },
+              { name: "Nemani Microcredit", src: nemaniLogo.url },
+              { name: "SWEDO", src: swedoLogo.url },
+            ].map((p) => (
+              <div key={p.name} className="flex items-center justify-center h-24 bg-card rounded-2xl border border-border/60 p-4">
+                <img src={p.src} alt={p.name} loading="lazy" className="max-h-full max-w-full object-contain" />
+              </div>
             ))}
           </div>
         </div>
