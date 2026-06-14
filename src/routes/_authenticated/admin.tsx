@@ -246,6 +246,8 @@ function Admin() {
       price: rest.price ?? "",
       what_you_learn: Array.isArray(rest.what_you_learn) ? rest.what_you_learn : [],
       modules: Array.isArray(rest.modules) ? rest.modules : [],
+      registration_start: rest.registration_start ?? null,
+      registration_end: rest.registration_end ?? null,
     });
   }
 
