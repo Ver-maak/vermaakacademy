@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
