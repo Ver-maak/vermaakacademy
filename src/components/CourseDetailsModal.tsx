@@ -123,9 +123,27 @@ export function CourseDetailsModal({
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-border/60 flex items-center justify-end">
-            <Button size="lg" variant="brand" onClick={() => onEnroll(course)}>Enroll Now</Button>
-          </div>
+          {(() => {
+            const reg = registrationStatus(course.registration_start, course.registration_end);
+            const toneCls =
+              reg.tone === "open"
+                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+                : reg.tone === "soon"
+                ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                : "bg-destructive/10 text-destructive border-destructive/30";
+            const disabled = reg.tone === "closed";
+            return (
+              <div className="mt-6 pt-6 border-t border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className={`inline-flex flex-col px-3 py-2 rounded-lg border text-xs ${toneCls}`}>
+                  <span className="font-semibold uppercase tracking-wider">{reg.label}</span>
+                  <span className="opacity-80">{reg.detail}</span>
+                </div>
+                <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
+                  {disabled ? "Registration closed" : "Enroll Now"}
+                </Button>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
