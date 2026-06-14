@@ -16,7 +16,10 @@ const links = [
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(() => {
+    if (typeof document === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
   const { user, isAdmin } = useAuth();
 
   useEffect(() => {
@@ -28,6 +31,7 @@ export function Navbar() {
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch {}
   }, [dark]);
 
   async function signOut() {
