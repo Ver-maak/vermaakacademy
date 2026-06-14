@@ -35,6 +35,8 @@ type CourseRow = {
   price: string | null;
   what_you_learn: string[];
   modules: Module[];
+  registration_start: string | null;
+  registration_end: string | null;
 };
 
 type Subscriber = { id: string; email: string; name: string; created_at: string };
@@ -59,6 +61,8 @@ const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   price: "",
   what_you_learn: [],
   modules: [],
+  registration_start: null,
+  registration_end: null,
 };
 
 type Tab = "courses" | "enrollments" | "partners" | "subscribers";
@@ -242,6 +246,8 @@ function Admin() {
       price: rest.price ?? "",
       what_you_learn: Array.isArray(rest.what_you_learn) ? rest.what_you_learn : [],
       modules: Array.isArray(rest.modules) ? rest.modules : [],
+      registration_start: rest.registration_start ?? null,
+      registration_end: rest.registration_end ?? null,
     });
   }
 
@@ -278,13 +284,18 @@ function Admin() {
     e.preventDefault();
     setBusy(true);
     try {
+      const normalized = {
+        ...form,
+        registration_start: form.registration_start ? form.registration_start : null,
+        registration_end: form.registration_end ? form.registration_end : null,
+      };
       if (editing) {
-        const payload = { ...form, pinned_at: form.pinned ? (editing.pinned_at ?? new Date().toISOString()) : null };
+        const payload = { ...normalized, pinned_at: form.pinned ? (editing.pinned_at ?? new Date().toISOString()) : null };
         const { error } = await supabase.from("courses").update(payload).eq("id", editing.id);
         if (error) throw error;
         toast.success("Course updated");
       } else {
-        const payload = { ...form, pinned_at: form.pinned ? new Date().toISOString() : null };
+        const payload = { ...normalized, pinned_at: form.pinned ? new Date().toISOString() : null };
         const { error } = await supabase.from("courses").insert(payload);
         if (error) throw error;
         toast.success("Course created");
@@ -561,6 +572,28 @@ function Admin() {
                   <textarea placeholder="Full description (longer, supports line breaks)" rows={4} value={form.full_description ?? ""} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="w-full p-3 rounded-lg bg-background border border-border resize-none text-sm" />
                   <input placeholder="Prerequisites" value={form.prerequisites ?? ""} onChange={(e) => setForm({ ...form, prerequisites: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
                   <input placeholder="Certificate info (e.g. Certificate on completion)" value={form.certificate ?? ""} onChange={(e) => setForm({ ...form, certificate: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registration opens (optional)</label>
+                      <input
+                        type="date"
+                        value={form.registration_start ? form.registration_start.slice(0, 10) : ""}
+                        onChange={(e) => setForm({ ...form, registration_start: e.target.value || null })}
+                        className="mt-1 w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registration closes (optional)</label>
+                      <input
+                        type="date"
+                        value={form.registration_end ? form.registration_end.slice(0, 10) : ""}
+                        onChange={(e) => setForm({ ...form, registration_end: e.target.value || null })}
+                        className="mt-1 w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground -mt-1">Leave both empty for open registration.</p>
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
