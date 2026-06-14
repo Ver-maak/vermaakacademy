@@ -104,6 +104,8 @@ export type Database = {
           price: string | null
           published: boolean
           rating: number
+          registration_end: string | null
+          registration_start: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -127,6 +129,8 @@ export type Database = {
           price?: string | null
           published?: boolean
           rating?: number
+          registration_end?: string | null
+          registration_start?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
@@ -150,6 +154,8 @@ export type Database = {
           price?: string | null
           published?: boolean
           rating?: number
+          registration_end?: string | null
+          registration_start?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
