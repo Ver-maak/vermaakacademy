@@ -486,7 +486,7 @@ function Admin() {
 
                 <div className="space-y-3">
                   {pagedCourses.map((c) => (
-                    <div key={c.id} className="flex gap-4 p-4 rounded-2xl bg-card border border-border/60">
+                    <div key={c.id} className={`flex gap-4 p-4 rounded-2xl bg-card border ${c.pinned ? "border-[var(--cyan)]/60 ring-1 ring-[var(--cyan)]/30" : "border-border/60"}`}>
                       {c.thumbnail_url ? (
                         <img src={c.thumbnail_url} alt="" className="h-20 w-32 rounded-lg object-cover shrink-0" />
                       ) : (
@@ -495,6 +495,7 @@ function Admin() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                           <span className="font-semibold text-[var(--ocean)]">{c.category}</span> · {c.level} · {c.duration}
+                          {c.pinned && <span className="px-2 rounded-full bg-[var(--cyan)]/20 text-[var(--ocean)] inline-flex items-center gap-1"><Pin className="h-3 w-3" />Pinned</span>}
                           {c.featured && <span className="px-2 rounded-full bg-[var(--cyan)]/15 text-[var(--ocean)]">Featured</span>}
                           {!c.published && <span className="px-2 rounded-full bg-destructive/15 text-destructive">Draft</span>}
                         </div>
@@ -502,6 +503,14 @@ function Admin() {
                         <p className="text-sm text-muted-foreground line-clamp-1">{c.description}</p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => togglePin(c)}
+                          title={c.pinned ? "Unpin from top" : "Pin to top"}
+                          aria-label={c.pinned ? "Unpin course" : "Pin course"}
+                          className={`h-9 w-9 rounded-full inline-flex items-center justify-center ${c.pinned ? "bg-[var(--cyan)]/15 text-[var(--ocean)] hover:bg-[var(--cyan)]/25" : "hover:bg-secondary"}`}
+                        >
+                          {c.pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                        </button>
                         <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
                         <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
                       </div>
@@ -540,9 +549,60 @@ function Admin() {
                 <input placeholder="…or paste image URL" value={form.thumbnail_url ?? ""} onChange={(e) => setForm({ ...form, thumbnail_url: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-xs" />
                 {form.thumbnail_url && <img src={form.thumbnail_url} alt="" className="w-full aspect-[16/10] object-cover rounded-lg" />}
 
-                <div className="flex gap-4 text-sm">
+                <div className="flex flex-wrap gap-4 text-sm">
                   <label className="flex items-center gap-2"><input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} /> Featured</label>
                   <label className="flex items-center gap-2"><input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} /> Published</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={form.pinned} onChange={(e) => setForm({ ...form, pinned: e.target.checked })} /> Pinned to top</label>
+                </div>
+
+                <div className="pt-3 border-t border-border/60 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Extra details (shown on course modal)</p>
+                  <input placeholder="Price (e.g. Free, $99, 350,000 UGX)" value={form.price ?? ""} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+                  <textarea placeholder="Full description (longer, supports line breaks)" rows={4} value={form.full_description ?? ""} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="w-full p-3 rounded-lg bg-background border border-border resize-none text-sm" />
+                  <input placeholder="Prerequisites" value={form.prerequisites ?? ""} onChange={(e) => setForm({ ...form, prerequisites: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+                  <input placeholder="Certificate info (e.g. Certificate on completion)" value={form.certificate ?? ""} onChange={(e) => setForm({ ...form, certificate: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">What you'll learn</label>
+                      <button type="button" onClick={() => setForm({ ...form, what_you_learn: [...form.what_you_learn, ""] })} className="text-xs inline-flex items-center gap-1 text-[var(--ocean)] hover:underline"><Plus className="h-3 w-3" /> Add</button>
+                    </div>
+                    <div className="space-y-2">
+                      {form.what_you_learn.map((item, i) => (
+                        <div key={i} className="flex gap-2">
+                          <input value={item} onChange={(e) => {
+                            const arr = [...form.what_you_learn]; arr[i] = e.target.value; setForm({ ...form, what_you_learn: arr });
+                          }} placeholder={`Outcome ${i + 1}`} className="flex-1 h-9 px-3 rounded-lg bg-background border border-border text-sm" />
+                          <button type="button" onClick={() => setForm({ ...form, what_you_learn: form.what_you_learn.filter((_, j) => j !== i) })} className="h-9 w-9 rounded-lg hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>
+                        </div>
+                      ))}
+                      {form.what_you_learn.length === 0 && <p className="text-xs text-muted-foreground">No outcomes yet.</p>}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Curriculum modules</label>
+                      <button type="button" onClick={() => setForm({ ...form, modules: [...form.modules, { title: "", description: "" }] })} className="text-xs inline-flex items-center gap-1 text-[var(--ocean)] hover:underline"><Plus className="h-3 w-3" /> Add module</button>
+                    </div>
+                    <div className="space-y-2">
+                      {form.modules.map((m, i) => (
+                        <div key={i} className="p-3 rounded-lg border border-border space-y-2">
+                          <div className="flex gap-2 items-center">
+                            <span className="text-xs text-muted-foreground w-8">{String(i + 1).padStart(2, "0")}</span>
+                            <input value={m.title} onChange={(e) => {
+                              const arr = [...form.modules]; arr[i] = { ...arr[i], title: e.target.value }; setForm({ ...form, modules: arr });
+                            }} placeholder="Module title" className="flex-1 h-9 px-3 rounded-lg bg-background border border-border text-sm" />
+                            <button type="button" onClick={() => setForm({ ...form, modules: form.modules.filter((_, j) => j !== i) })} className="h-9 w-9 rounded-lg hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>
+                          </div>
+                          <textarea value={m.description} onChange={(e) => {
+                            const arr = [...form.modules]; arr[i] = { ...arr[i], description: e.target.value }; setForm({ ...form, modules: arr });
+                          }} placeholder="What this module covers (optional)" rows={2} className="w-full p-2 rounded-lg bg-background border border-border text-xs resize-none" />
+                        </div>
+                      ))}
+                      {form.modules.length === 0 && <p className="text-xs text-muted-foreground">No modules yet.</p>}
+                    </div>
+                  </div>
                 </div>
 
                 <Button type="submit" variant="brand" className="w-full" disabled={busy}>
