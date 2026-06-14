@@ -711,8 +711,24 @@ function Admin() {
                         <div className="text-sm text-muted-foreground mt-1">
                           <a href={`mailto:${p.email}`} className="hover:text-foreground">{p.email}</a>
                           {p.phone && <> · {p.phone}</>}
+                          {p.website && <> · <a href={p.website} target="_blank" rel="noopener noreferrer" className="hover:text-foreground underline">{p.website}</a></>}
                         </div>
-                        {p.message && <p className="text-sm mt-3 max-w-2xl">{p.message}</p>}
+                        {(p.role || p.city || p.country || p.industry || p.organization_size || p.budget_range || p.timeline) && (
+                          <div className="mt-2 flex flex-wrap gap-1.5 text-[11px]">
+                            {[
+                              p.role,
+                              [p.city, p.country].filter(Boolean).join(", "),
+                              p.industry,
+                              p.organization_size && `${p.organization_size} people`,
+                              p.budget_range && `Budget: ${p.budget_range}`,
+                              p.timeline && `Timeline: ${p.timeline}`,
+                            ].filter(Boolean).map((t, i) => (
+                              <span key={i} className="px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">{t}</span>
+                            ))}
+                          </div>
+                        )}
+                        {p.goals && <p className="text-sm mt-3 max-w-2xl"><span className="font-semibold">Goals:</span> {p.goals}</p>}
+                        {p.message && <p className="text-sm mt-2 max-w-2xl">{p.message}</p>}
                         <p className="text-xs text-muted-foreground mt-2">Received {new Date(p.created_at).toLocaleString()}</p>
                       </div>
                       <div className="flex items-center gap-2">
