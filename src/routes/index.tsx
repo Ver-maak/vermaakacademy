@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { CourseCard, type CourseCardData } from "@/components/CourseCard";
+import { CourseDetailsModal, type CourseDetails } from "@/components/CourseDetailsModal";
 import { Counter } from "@/components/Counter";
 import { PartnerForm } from "@/components/PartnerForm";
 import { EnrollForm } from "@/components/EnrollForm";
