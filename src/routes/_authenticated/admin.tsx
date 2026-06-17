@@ -37,6 +37,7 @@ type CourseRow = {
   modules: Module[];
   registration_start: string | null;
   registration_end: string | null;
+  credit_cost: number;
 };
 
 type Subscriber = { id: string; email: string; name: string; created_at: string; unsubscribed_at: string | null; unsubscribe_token: string };
@@ -63,9 +64,13 @@ const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   modules: [],
   registration_start: null,
   registration_end: null,
+  credit_cost: 0,
 };
 
-type Tab = "courses" | "enrollments" | "partners" | "subscribers";
+type Tab = "courses" | "enrollments" | "partners" | "subscribers" | "credits";
+
+type CreditBalance = { email: string; balance: number; updated_at: string };
+type CreditTx = { id: string; email: string; amount: number; type: string; reason: string; course_title: string | null; created_at: string };
 
 const PAGE_SIZE = 8;
 
