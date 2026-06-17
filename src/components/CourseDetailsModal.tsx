@@ -17,6 +17,7 @@ export type CourseDetails = {
   prerequisites?: string | null;
   certificate?: string | null;
   price?: string | null;
+  credit_cost?: number | null;
   what_you_learn?: string[] | null;
   modules?: Module[] | null;
   registration_start?: string | null;
@@ -61,6 +62,11 @@ export function CourseDetailsModal({
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 flex-wrap">
             <span className="font-semibold text-[var(--ocean)] uppercase tracking-wider">{course.category}</span> · <span>{course.level}</span> · <span>{course.duration}</span>
             {course.price && <span>· <strong className="text-foreground">{course.price}</strong></span>}
+            {(course.credit_cost ?? 0) > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--cyan)]/15 text-[var(--ocean)] font-semibold">
+                {course.credit_cost} credits
+              </span>
+            )}
           </div>
           <h2 className="font-display font-extrabold text-3xl mb-2">{course.title}</h2>
           <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{course.full_description?.trim() || course.description}</p>

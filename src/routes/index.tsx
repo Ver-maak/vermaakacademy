@@ -308,7 +308,7 @@ function Home() {
 
       <PartnerForm open={partnerOpen} onClose={() => setPartnerOpen(false)} />
       <CourseDetailsModal course={details} onClose={() => setDetails(null)} onEnroll={(c) => { setEnrollFor(c); setDetails(null); }} />
-      <EnrollForm open={!!enrollFor} onClose={() => setEnrollFor(null)} course={enrollFor ? { id: enrollFor.id, title: enrollFor.title } : null} />
+      <EnrollForm open={!!enrollFor} onClose={() => setEnrollFor(null)} course={enrollFor ? { id: enrollFor.id, title: enrollFor.title, credit_cost: (enrollFor as any).credit_cost ?? 0 } : null} />
 
       <Footer />
     </main>

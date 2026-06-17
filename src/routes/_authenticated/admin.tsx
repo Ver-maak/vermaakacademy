@@ -37,6 +37,7 @@ type CourseRow = {
   modules: Module[];
   registration_start: string | null;
   registration_end: string | null;
+  credit_cost: number;
 };
 
 type Subscriber = { id: string; email: string; name: string; created_at: string; unsubscribed_at: string | null; unsubscribe_token: string };
@@ -63,9 +64,13 @@ const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   modules: [],
   registration_start: null,
   registration_end: null,
+  credit_cost: 0,
 };
 
-type Tab = "courses" | "enrollments" | "partners" | "subscribers";
+type Tab = "courses" | "enrollments" | "partners" | "subscribers" | "credits";
+
+type CreditBalance = { email: string; balance: number; updated_at: string };
+type CreditTx = { id: string; email: string; amount: number; type: string; reason: string; course_title: string | null; created_at: string };
 
 const PAGE_SIZE = 8;
 
@@ -207,17 +212,48 @@ function Admin() {
   const [subPage, setSubPage] = useState(1);
   const [subSort, setSubSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
+  // Credits
+  const [balances, setBalances] = useState<CreditBalance[]>([]);
+  const [credTxs, setCredTxs] = useState<CreditTx[]>([]);
+  const [credQ, setCredQ] = useState("");
+  const [credEmail, setCredEmail] = useState("");
+  const [credAmount, setCredAmount] = useState<number>(10);
+  const [credReason, setCredReason] = useState("");
+  const [credBusy, setCredBusy] = useState(false);
+  const [credSelectedEmail, setCredSelectedEmail] = useState<string | null>(null);
+
   async function refresh() {
-    const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
+    const [{ data: c }, { data: s }, { data: p }, { data: e }, { data: b }, { data: tx }] = await Promise.all([
       supabase.from("courses").select("*").order("pinned", { ascending: false }).order("pinned_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
       supabase.from("newsletter_subscribers").select("id,email,name,created_at,unsubscribed_at,unsubscribe_token").order("created_at", { ascending: false }),
       supabase.from("partner_inquiries").select("*").order("created_at", { ascending: false }),
       supabase.from("course_enrollments").select("*").order("created_at", { ascending: false }),
+      supabase.from("credit_balances").select("email,balance,updated_at").order("updated_at", { ascending: false }),
+      supabase.from("credit_transactions").select("id,email,amount,type,reason,course_title,created_at").order("created_at", { ascending: false }).limit(500),
     ]);
     setCourses((c as unknown as CourseRow[]) ?? []);
     setSubs(s ?? []);
     setPartners((p as unknown as Partner[]) ?? []);
     setEnrollments((e as unknown as Enrollment[]) ?? []);
+    setBalances((b as CreditBalance[]) ?? []);
+    setCredTxs((tx as CreditTx[]) ?? []);
+  }
+
+  async function adjustCredits(e: React.FormEvent) {
+    e.preventDefault();
+    if (!credEmail.trim()) return toast.error("Email required");
+    if (!credAmount || isNaN(credAmount)) return toast.error("Amount required");
+    setCredBusy(true);
+    const { error } = await supabase.rpc("admin_adjust_credits", {
+      _email: credEmail.trim(),
+      _amount: Math.trunc(credAmount),
+      _reason: credReason.trim(),
+    });
+    setCredBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(credAmount > 0 ? `Granted ${credAmount} credits` : `Deducted ${Math.abs(credAmount)} credits`);
+    setCredReason("");
+    refresh();
   }
 
   useEffect(() => {
@@ -479,6 +515,7 @@ function Admin() {
     { id: "enrollments", label: `Enrollments (${enrollments.length})` },
     { id: "partners", label: `Partners (${partners.length})` },
     { id: "subscribers", label: `Subscribers (${subs.length})` },
+    { id: "credits", label: `Credits (${balances.length})` },
   ];
 
   const selectCls = "h-10 px-3 rounded-lg bg-background border border-border text-sm";
@@ -625,7 +662,22 @@ function Admin() {
 
                 <div className="pt-3 border-t border-border/60 space-y-3">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Extra details (shown on course modal)</p>
-                  <input placeholder="Price (e.g. Free, $99, 350,000 UGX)" value={form.price ?? ""} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input placeholder="Price (e.g. Free, $99)" value={form.price ?? ""} onChange={(e) => setForm({ ...form, price: e.target.value })} className="h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="Credit cost"
+                        value={form.credit_cost}
+                        onChange={(e) => setForm({ ...form, credit_cost: Math.max(0, parseInt(e.target.value || "0", 10) || 0) })}
+                        className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground pointer-events-none">credits</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground -mt-1">Set credit cost to 0 for a free course.</p>
                   <textarea placeholder="Full description (longer, supports line breaks)" rows={4} value={form.full_description ?? ""} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="w-full p-3 rounded-lg bg-background border border-border resize-none text-sm" />
                   <input placeholder="Prerequisites" value={form.prerequisites ?? ""} onChange={(e) => setForm({ ...form, prerequisites: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
                   <input placeholder="Certificate info (e.g. Certificate on completion)" value={form.certificate ?? ""} onChange={(e) => setForm({ ...form, certificate: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
@@ -907,6 +959,114 @@ function Admin() {
               <Pager page={subPage} setPage={setSubPage} total={filteredSubs.length} />
             </div>
           )}
+
+          {tab === "credits" && (() => {
+            const q = credQ.toLowerCase().trim();
+            const filteredBalances = q ? balances.filter((b) => b.email.toLowerCase().includes(q)) : balances;
+            const selectedTxs = credSelectedEmail ? credTxs.filter((t) => t.email === credSelectedEmail) : [];
+            return (
+              <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+                <div>
+                  <SearchBar value={credQ} onChange={setCredQ} placeholder="Search by student email…" />
+                  <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-secondary/40 text-left">
+                        <tr><th className="p-3">Email</th><th className="p-3">Balance</th><th className="p-3">Last activity</th><th className="p-3"></th></tr>
+                      </thead>
+                      <tbody>
+                        {filteredBalances.map((b) => (
+                          <tr key={b.email} className={`border-t border-border/60 ${credSelectedEmail === b.email ? "bg-secondary/30" : ""}`}>
+                            <td className="p-3">{b.email}</td>
+                            <td className="p-3 font-semibold">{b.balance} <span className="text-xs text-muted-foreground">credits</span></td>
+                            <td className="p-3 text-muted-foreground">{new Date(b.updated_at).toLocaleString()}</td>
+                            <td className="p-3 text-right whitespace-nowrap">
+                              <button onClick={() => { setCredEmail(b.email); setCredSelectedEmail(b.email); }} className="text-xs hover:underline mr-3">Adjust</button>
+                              <button onClick={() => setCredSelectedEmail(credSelectedEmail === b.email ? null : b.email)} className="text-xs hover:underline">
+                                {credSelectedEmail === b.email ? "Hide ledger" : "View ledger"}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredBalances.length === 0 && <tr><td className="p-6 text-center text-muted-foreground" colSpan={4}>No students with credits yet.</td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {credSelectedEmail && (
+                    <div className="mt-6 p-5 rounded-2xl bg-card border border-border/60">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-display font-bold">Ledger · {credSelectedEmail}</h3>
+                        <button onClick={() => setCredSelectedEmail(null)} className="text-xs text-muted-foreground hover:underline">Close</button>
+                      </div>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {selectedTxs.length === 0 && <p className="text-sm text-muted-foreground">No transactions.</p>}
+                        {selectedTxs.map((t) => (
+                          <div key={t.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/60 text-sm">
+                            <span className={`shrink-0 font-semibold ${t.amount >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                              {t.amount > 0 ? "+" : ""}{t.amount}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t.type}{t.course_title ? ` · ${t.course_title}` : ""}</div>
+                              {t.reason && <div>{t.reason}</div>}
+                              <div className="text-xs text-muted-foreground mt-0.5">{new Date(t.created_at).toLocaleString()}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <form onSubmit={adjustCredits} className="space-y-3 p-6 rounded-2xl bg-card border border-border/60 h-fit sticky top-24">
+                  <h2 className="font-display font-bold text-lg">Grant or deduct credits</h2>
+                  <p className="text-xs text-muted-foreground">Positive amount grants credits; negative deducts. Balance can't go below zero.</p>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Student email"
+                    value={credEmail}
+                    onChange={(e) => setCredEmail(e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                  />
+                  <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center">
+                    <button type="button" onClick={() => setCredAmount(-Math.abs(credAmount || 1))} className="h-10 px-3 rounded-lg border border-border text-sm hover:bg-secondary">−</button>
+                    <input
+                      type="number"
+                      step={1}
+                      value={credAmount}
+                      onChange={(e) => setCredAmount(parseInt(e.target.value || "0", 10) || 0)}
+                      className="h-10 px-3 rounded-lg bg-background border border-border text-sm text-center"
+                    />
+                    <button type="button" onClick={() => setCredAmount(Math.abs(credAmount || 1))} className="h-10 px-3 rounded-lg border border-border text-sm hover:bg-secondary">+</button>
+                  </div>
+                  <input
+                    placeholder="Reason / note (optional)"
+                    value={credReason}
+                    onChange={(e) => setCredReason(e.target.value)}
+                    maxLength={200}
+                    className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                  />
+                  <Button type="submit" variant="brand" className="w-full" disabled={credBusy || credAmount === 0}>
+                    {credBusy ? "Saving…" : credAmount > 0 ? `Grant ${credAmount} credits` : credAmount < 0 ? `Deduct ${Math.abs(credAmount)} credits` : "Enter an amount"}
+                  </Button>
+                  <div className="pt-3 border-t border-border/60">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Recent activity</p>
+                    <div className="space-y-1.5 max-h-64 overflow-y-auto">
+                      {credTxs.slice(0, 20).map((t) => (
+                        <div key={t.id} className="text-xs flex items-center justify-between gap-2">
+                          <span className="truncate text-muted-foreground">{t.email}</span>
+                          <span className={`shrink-0 font-semibold ${t.amount >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                            {t.amount > 0 ? "+" : ""}{t.amount}
+                          </span>
+                        </div>
+                      ))}
+                      {credTxs.length === 0 && <p className="text-xs text-muted-foreground">No activity yet.</p>}
+                    </div>
+                  </div>
+                </form>
+              </div>
+            );
+          })()}
         </div>
       </section>
       <Footer />
