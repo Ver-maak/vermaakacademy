@@ -223,16 +223,37 @@ function Admin() {
   const [credSelectedEmail, setCredSelectedEmail] = useState<string | null>(null);
 
   async function refresh() {
-    const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
+    const [{ data: c }, { data: s }, { data: p }, { data: e }, { data: b }, { data: tx }] = await Promise.all([
       supabase.from("courses").select("*").order("pinned", { ascending: false }).order("pinned_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
       supabase.from("newsletter_subscribers").select("id,email,name,created_at,unsubscribed_at,unsubscribe_token").order("created_at", { ascending: false }),
       supabase.from("partner_inquiries").select("*").order("created_at", { ascending: false }),
       supabase.from("course_enrollments").select("*").order("created_at", { ascending: false }),
+      supabase.from("credit_balances").select("email,balance,updated_at").order("updated_at", { ascending: false }),
+      supabase.from("credit_transactions").select("id,email,amount,type,reason,course_title,created_at").order("created_at", { ascending: false }).limit(500),
     ]);
     setCourses((c as unknown as CourseRow[]) ?? []);
     setSubs(s ?? []);
     setPartners((p as unknown as Partner[]) ?? []);
     setEnrollments((e as unknown as Enrollment[]) ?? []);
+    setBalances((b as CreditBalance[]) ?? []);
+    setCredTxs((tx as CreditTx[]) ?? []);
+  }
+
+  async function adjustCredits(e: React.FormEvent) {
+    e.preventDefault();
+    if (!credEmail.trim()) return toast.error("Email required");
+    if (!credAmount || isNaN(credAmount)) return toast.error("Amount required");
+    setCredBusy(true);
+    const { error } = await supabase.rpc("admin_adjust_credits", {
+      _email: credEmail.trim(),
+      _amount: Math.trunc(credAmount),
+      _reason: credReason.trim(),
+    });
+    setCredBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(credAmount > 0 ? `Granted ${credAmount} credits` : `Deducted ${Math.abs(credAmount)} credits`);
+    setCredReason("");
+    refresh();
   }
 
   useEffect(() => {
