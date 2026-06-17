@@ -212,6 +212,16 @@ function Admin() {
   const [subPage, setSubPage] = useState(1);
   const [subSort, setSubSort] = useState<{ by: string; dir: SortDir }>({ by: "created_at", dir: "desc" });
 
+  // Credits
+  const [balances, setBalances] = useState<CreditBalance[]>([]);
+  const [credTxs, setCredTxs] = useState<CreditTx[]>([]);
+  const [credQ, setCredQ] = useState("");
+  const [credEmail, setCredEmail] = useState("");
+  const [credAmount, setCredAmount] = useState<number>(10);
+  const [credReason, setCredReason] = useState("");
+  const [credBusy, setCredBusy] = useState(false);
+  const [credSelectedEmail, setCredSelectedEmail] = useState<string | null>(null);
+
   async function refresh() {
     const [{ data: c }, { data: s }, { data: p }, { data: e }] = await Promise.all([
       supabase.from("courses").select("*").order("pinned", { ascending: false }).order("pinned_at", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
