@@ -959,6 +959,114 @@ function Admin() {
               <Pager page={subPage} setPage={setSubPage} total={filteredSubs.length} />
             </div>
           )}
+
+          {tab === "credits" && (() => {
+            const q = credQ.toLowerCase().trim();
+            const filteredBalances = q ? balances.filter((b) => b.email.toLowerCase().includes(q)) : balances;
+            const selectedTxs = credSelectedEmail ? credTxs.filter((t) => t.email === credSelectedEmail) : [];
+            return (
+              <div className="grid lg:grid-cols-[1fr_380px] gap-8">
+                <div>
+                  <SearchBar value={credQ} onChange={setCredQ} placeholder="Search by student email…" />
+                  <div className="rounded-2xl bg-card border border-border/60 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-secondary/40 text-left">
+                        <tr><th className="p-3">Email</th><th className="p-3">Balance</th><th className="p-3">Last activity</th><th className="p-3"></th></tr>
+                      </thead>
+                      <tbody>
+                        {filteredBalances.map((b) => (
+                          <tr key={b.email} className={`border-t border-border/60 ${credSelectedEmail === b.email ? "bg-secondary/30" : ""}`}>
+                            <td className="p-3">{b.email}</td>
+                            <td className="p-3 font-semibold">{b.balance} <span className="text-xs text-muted-foreground">credits</span></td>
+                            <td className="p-3 text-muted-foreground">{new Date(b.updated_at).toLocaleString()}</td>
+                            <td className="p-3 text-right whitespace-nowrap">
+                              <button onClick={() => { setCredEmail(b.email); setCredSelectedEmail(b.email); }} className="text-xs hover:underline mr-3">Adjust</button>
+                              <button onClick={() => setCredSelectedEmail(credSelectedEmail === b.email ? null : b.email)} className="text-xs hover:underline">
+                                {credSelectedEmail === b.email ? "Hide ledger" : "View ledger"}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredBalances.length === 0 && <tr><td className="p-6 text-center text-muted-foreground" colSpan={4}>No students with credits yet.</td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {credSelectedEmail && (
+                    <div className="mt-6 p-5 rounded-2xl bg-card border border-border/60">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-display font-bold">Ledger · {credSelectedEmail}</h3>
+                        <button onClick={() => setCredSelectedEmail(null)} className="text-xs text-muted-foreground hover:underline">Close</button>
+                      </div>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {selectedTxs.length === 0 && <p className="text-sm text-muted-foreground">No transactions.</p>}
+                        {selectedTxs.map((t) => (
+                          <div key={t.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/60 text-sm">
+                            <span className={`shrink-0 font-semibold ${t.amount >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                              {t.amount > 0 ? "+" : ""}{t.amount}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t.type}{t.course_title ? ` · ${t.course_title}` : ""}</div>
+                              {t.reason && <div>{t.reason}</div>}
+                              <div className="text-xs text-muted-foreground mt-0.5">{new Date(t.created_at).toLocaleString()}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <form onSubmit={adjustCredits} className="space-y-3 p-6 rounded-2xl bg-card border border-border/60 h-fit sticky top-24">
+                  <h2 className="font-display font-bold text-lg">Grant or deduct credits</h2>
+                  <p className="text-xs text-muted-foreground">Positive amount grants credits; negative deducts. Balance can't go below zero.</p>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Student email"
+                    value={credEmail}
+                    onChange={(e) => setCredEmail(e.target.value)}
+                    className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                  />
+                  <div className="grid grid-cols-[auto_1fr_auto] gap-2 items-center">
+                    <button type="button" onClick={() => setCredAmount(-Math.abs(credAmount || 1))} className="h-10 px-3 rounded-lg border border-border text-sm hover:bg-secondary">−</button>
+                    <input
+                      type="number"
+                      step={1}
+                      value={credAmount}
+                      onChange={(e) => setCredAmount(parseInt(e.target.value || "0", 10) || 0)}
+                      className="h-10 px-3 rounded-lg bg-background border border-border text-sm text-center"
+                    />
+                    <button type="button" onClick={() => setCredAmount(Math.abs(credAmount || 1))} className="h-10 px-3 rounded-lg border border-border text-sm hover:bg-secondary">+</button>
+                  </div>
+                  <input
+                    placeholder="Reason / note (optional)"
+                    value={credReason}
+                    onChange={(e) => setCredReason(e.target.value)}
+                    maxLength={200}
+                    className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                  />
+                  <Button type="submit" variant="brand" className="w-full" disabled={credBusy || credAmount === 0}>
+                    {credBusy ? "Saving…" : credAmount > 0 ? `Grant ${credAmount} credits` : credAmount < 0 ? `Deduct ${Math.abs(credAmount)} credits` : "Enter an amount"}
+                  </Button>
+                  <div className="pt-3 border-t border-border/60">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Recent activity</p>
+                    <div className="space-y-1.5 max-h-64 overflow-y-auto">
+                      {credTxs.slice(0, 20).map((t) => (
+                        <div key={t.id} className="text-xs flex items-center justify-between gap-2">
+                          <span className="truncate text-muted-foreground">{t.email}</span>
+                          <span className={`shrink-0 font-semibold ${t.amount >= 0 ? "text-emerald-600" : "text-destructive"}`}>
+                            {t.amount > 0 ? "+" : ""}{t.amount}
+                          </span>
+                        </div>
+                      ))}
+                      {credTxs.length === 0 && <p className="text-xs text-muted-foreground">No activity yet.</p>}
+                    </div>
+                  </div>
+                </form>
+              </div>
+            );
+          })()}
         </div>
       </section>
       <Footer />
