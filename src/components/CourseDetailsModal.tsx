@@ -168,9 +168,14 @@ export function CourseDetailsModal({
                   <span className="font-semibold uppercase tracking-wider">{reg.label}</span>
                   <span className="opacity-80">{reg.detail}</span>
                 </div>
-                <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
-                  {disabled ? "Registration closed" : "Enroll Now"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button size="lg" variant="outline" onClick={() => shareCourse(course)} aria-label="Share course">
+                    <Share2 className="h-4 w-4 mr-2" /> Share
+                  </Button>
+                  <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
+                    {disabled ? "Registration closed" : "Enroll Now"}
+                  </Button>
+                </div>
               </div>
             );
           })()}
