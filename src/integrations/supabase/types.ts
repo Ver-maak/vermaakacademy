@@ -90,6 +90,7 @@ export type Database = {
           category: string
           certificate: string | null
           created_at: string
+          credit_cost: number
           description: string
           duration: string
           featured: boolean
@@ -115,6 +116,7 @@ export type Database = {
           category?: string
           certificate?: string | null
           created_at?: string
+          credit_cost?: number
           description?: string
           duration?: string
           featured?: boolean
@@ -140,6 +142,7 @@ export type Database = {
           category?: string
           certificate?: string | null
           created_at?: string
+          credit_cost?: number
           description?: string
           duration?: string
           featured?: boolean
@@ -162,6 +165,71 @@ export type Database = {
           what_you_learn?: Json
         }
         Relationships: []
+      }
+      credit_balances: {
+        Row: {
+          balance: number
+          created_at: string
+          email: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          email: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          email?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          amount: number
+          course_id: string | null
+          course_title: string | null
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          reason: string
+          type: string
+        }
+        Insert: {
+          amount: number
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          reason?: string
+          type: string
+        }
+        Update: {
+          amount?: number
+          course_id?: string | null
+          course_title?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          reason?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
@@ -279,6 +347,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_credits: {
+        Args: { _amount: number; _email: string; _reason?: string }
+        Returns: {
+          balance: number
+          email: string
+        }[]
+      }
       get_subscriber_by_token: {
         Args: { _token: string }
         Returns: {
@@ -292,6 +367,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      spend_credits_for_enrollment: {
+        Args: { _course_id: string; _email: string }
+        Returns: {
+          balance: number
+          cost: number
+          message: string
+          success: boolean
+        }[]
       }
       unsubscribe_newsletter: {
         Args: { _token: string }
