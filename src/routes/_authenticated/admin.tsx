@@ -630,7 +630,22 @@ function Admin() {
 
                 <div className="pt-3 border-t border-border/60 space-y-3">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Extra details (shown on course modal)</p>
-                  <input placeholder="Price (e.g. Free, $99, 350,000 UGX)" value={form.price ?? ""} onChange={(e) => setForm({ ...form, price: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+                  <div className="grid grid-cols-2 gap-3">
+                    <input placeholder="Price (e.g. Free, $99)" value={form.price ?? ""} onChange={(e) => setForm({ ...form, price: e.target.value })} className="h-10 px-3 rounded-lg bg-background border border-border text-sm" />
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min={0}
+                        step={1}
+                        placeholder="Credit cost"
+                        value={form.credit_cost}
+                        onChange={(e) => setForm({ ...form, credit_cost: Math.max(0, parseInt(e.target.value || "0", 10) || 0) })}
+                        className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground pointer-events-none">credits</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground -mt-1">Set credit cost to 0 for a free course.</p>
                   <textarea placeholder="Full description (longer, supports line breaks)" rows={4} value={form.full_description ?? ""} onChange={(e) => setForm({ ...form, full_description: e.target.value })} className="w-full p-3 rounded-lg bg-background border border-border resize-none text-sm" />
                   <input placeholder="Prerequisites" value={form.prerequisites ?? ""} onChange={(e) => setForm({ ...form, prerequisites: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
                   <input placeholder="Certificate info (e.g. Certificate on completion)" value={form.certificate ?? ""} onChange={(e) => setForm({ ...form, certificate: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-background border border-border text-sm" />
