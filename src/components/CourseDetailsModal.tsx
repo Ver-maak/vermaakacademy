@@ -1,5 +1,29 @@
-import { X } from "lucide-react";
+import { Share2, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
+
+async function shareCourse(course: { id: string; title: string; description: string }) {
+  const url = `${window.location.origin}/courses?course=${course.id}`;
+  const shareData = {
+    title: `${course.title} — Vermaak Academy`,
+    text: course.description,
+    url,
+  };
+  try {
+    if (navigator.share && navigator.canShare?.(shareData) !== false) {
+      await navigator.share(shareData);
+      return;
+    }
+  } catch (e: any) {
+    if (e?.name === "AbortError") return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success("Course link copied to clipboard");
+  } catch {
+    toast.error("Could not share course");
+  }
+}
 
 type Module = { title: string; description?: string };
 
@@ -144,9 +168,14 @@ export function CourseDetailsModal({
                   <span className="font-semibold uppercase tracking-wider">{reg.label}</span>
                   <span className="opacity-80">{reg.detail}</span>
                 </div>
-                <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
-                  {disabled ? "Registration closed" : "Enroll Now"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button size="lg" variant="outline" onClick={() => shareCourse(course)} aria-label="Share course">
+                    <Share2 className="h-4 w-4 mr-2" /> Share
+                  </Button>
+                  <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
+                    {disabled ? "Registration closed" : "Enroll Now"}
+                  </Button>
+                </div>
               </div>
             );
           })()}

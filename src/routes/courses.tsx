@@ -56,7 +56,15 @@ function Courses() {
       .order("pinned", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
-        if (!error && data) setData(data as CourseRow[]);
+        if (!error && data) {
+          setData(data as CourseRow[]);
+          const params = new URLSearchParams(window.location.search);
+          const shared = params.get("course");
+          if (shared) {
+            const match = (data as CourseRow[]).find((c) => c.id === shared);
+            if (match) setActive(match);
+          }
+        }
         setLoading(false);
       });
   }, []);
