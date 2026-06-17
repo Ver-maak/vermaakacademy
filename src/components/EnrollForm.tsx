@@ -24,7 +24,7 @@ const schema = z.object({
 type Props = {
   open: boolean;
   onClose: () => void;
-  course?: { id: string; title: string } | null;
+  course?: { id: string; title: string; credit_cost?: number } | null;
 };
 
 const AGE = ["Under 18", "18–24", "25–34", "35–44", "45+"];
@@ -57,6 +57,28 @@ export function EnrollForm({ open, onClose, course }: Props) {
       return;
     }
     setBusy(true);
+
+    // If this course costs credits, attempt to spend them first.
+    if (course?.id && (course.credit_cost ?? 0) > 0) {
+      const { data: spendRows, error: spendErr } = await supabase.rpc("spend_credits_for_enrollment", {
+        _email: parsed.data.email,
+        _course_id: course.id,
+      });
+      if (spendErr) {
+        setBusy(false);
+        return toast.error(spendErr.message);
+      }
+      const result = Array.isArray(spendRows) ? spendRows[0] : spendRows;
+      if (!result?.success) {
+        setBusy(false);
+        return toast.error(
+          result?.message === "Insufficient credits"
+            ? `You need ${result.cost} credits but only have ${result.balance}. Contact us to top up.`
+            : result?.message || "Could not process credit payment",
+        );
+      }
+    }
+
     const { error } = await supabase.from("course_enrollments").insert({
       ...parsed.data,
       course_id: course?.id ?? null,
