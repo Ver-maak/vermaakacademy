@@ -515,6 +515,7 @@ function Admin() {
     { id: "enrollments", label: `Enrollments (${enrollments.length})` },
     { id: "partners", label: `Partners (${partners.length})` },
     { id: "subscribers", label: `Subscribers (${subs.length})` },
+    { id: "credits", label: `Credits (${balances.length})` },
   ];
 
   const selectCls = "h-10 px-3 rounded-lg bg-background border border-border text-sm";
