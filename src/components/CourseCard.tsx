@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Star, Clock, BarChart3 } from "lucide-react";
+import { Star, Clock, BarChart3, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 
 export type CourseCardData = {
@@ -15,6 +16,26 @@ export type CourseCardData = {
 };
 
 export function CourseCard({ course, onClick }: { course: CourseCardData; onClick?: () => void }) {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/courses?course=${course.id}`;
+    const shareData = { title: course.title, text: course.description, url };
+    try {
+      if (typeof navigator !== "undefined" && navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch {
+      // fall through to clipboard
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Course link copied to clipboard");
+    } catch {
+      toast.error("Could not share course");
+    }
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -50,7 +71,15 @@ export function CourseCard({ course, onClick }: { course: CourseCardData; onClic
           <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> {course.duration}</span>
           <span className="flex items-center gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> {course.level}</span>
         </div>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleShare}
+            aria-label={`Share ${course.title}`}
+          >
+            <Share2 className="h-3.5 w-3.5" /> Share
+          </Button>
           <Button size="sm" variant="brand" onClick={onClick}>Enroll</Button>
         </div>
       </div>
