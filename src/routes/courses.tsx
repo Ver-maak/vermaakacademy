@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CourseCard, type CourseCardData } from "@/components/CourseCard";
 import { EnrollForm } from "@/components/EnrollForm";
+import { CourseReviews } from "@/components/reviews/CourseReviews";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -256,6 +257,8 @@ function Courses() {
                   </ul>
                 </div>
               </div>
+
+              <CourseReviews courseId={active.id} />
 
               {(() => {
                 const s = active.registration_start ? new Date(active.registration_start) : null;
