@@ -340,6 +340,53 @@ export type Database = {
           },
         ]
       }
+      course_reviews: {
+        Row: {
+          body: string
+          course_id: string
+          created_at: string
+          id: string
+          learner_name: string
+          rating: number
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          course_id: string
+          created_at?: string
+          id?: string
+          learner_name?: string
+          rating: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          learner_name?: string
+          rating?: number
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           archived_at: string | null
@@ -1478,6 +1525,14 @@ export type Database = {
           module_id: string
           module_position: number
           module_title: string
+        }[]
+      }
+      get_course_ratings: {
+        Args: never
+        Returns: {
+          avg_rating: number
+          course_id: string
+          review_count: number
         }[]
       }
       get_subscriber_by_token: {
