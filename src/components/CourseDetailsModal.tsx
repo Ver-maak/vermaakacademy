@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Share2, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import { CourseReviews } from "./reviews/CourseReviews";
 
 async function shareCourse(course: { id: string; title: string; description: string }) {
   const url = `${window.location.origin}/courses?course=${course.id}`;
@@ -153,6 +154,8 @@ export function CourseDetailsModal({
               </ul>
             </div>
           </div>
+
+          <CourseReviews courseId={course.id} />
 
           {(() => {
             const reg = registrationStatus(course.registration_start, course.registration_end);
