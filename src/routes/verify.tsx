@@ -66,10 +66,22 @@ function Verify() {
           </form>
 
           {state === "found" && cert && (
-            <div className="mt-8 rounded-2xl border border-emerald-500/40 bg-emerald-500/5 p-6">
-              <p className="inline-flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 mb-4">
-                <BadgeCheck className="h-5 w-5" /> Valid certificate
-              </p>
+            <div
+              className={`mt-8 rounded-2xl border p-6 ${
+                cert.status === "revoked"
+                  ? "border-destructive/40 bg-destructive/5"
+                  : "border-emerald-500/40 bg-emerald-500/5"
+              }`}
+            >
+              {cert.status === "revoked" ? (
+                <p className="inline-flex items-center gap-2 font-semibold text-destructive mb-4">
+                  <XCircle className="h-5 w-5" /> This certificate has been revoked
+                </p>
+              ) : (
+                <p className="inline-flex items-center gap-2 font-semibold text-emerald-600 dark:text-emerald-400 mb-4">
+                  <BadgeCheck className="h-5 w-5" /> Valid certificate
+                </p>
+              )}
               <dl className="grid sm:grid-cols-2 gap-4 text-sm">
                 <div><dt className="text-muted-foreground">Learner</dt><dd className="font-medium">{cert.learner_name}</dd></div>
                 <div><dt className="text-muted-foreground">Course</dt><dd className="font-medium">{cert.course_title}</dd></div>
@@ -79,6 +91,7 @@ function Verify() {
               </dl>
             </div>
           )}
+
 
           {state === "missing" && (
             <div className="mt-8 rounded-2xl border border-destructive/40 bg-destructive/5 p-6">
