@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Share2, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
