@@ -172,9 +172,18 @@ export function CourseDetailsModal({
                   <Button size="lg" variant="outline" onClick={() => shareCourse(course)} aria-label="Share course">
                     <Share2 className="h-4 w-4 mr-2" /> Share
                   </Button>
-                  <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
-                    {disabled ? "Registration closed" : "Enroll Now"}
-                  </Button>
+                  {Number((course as any).price_ugx ?? 0) > 0 ? (
+                    <Button asChild size="lg" variant="brand" disabled={disabled}>
+                      <Link to="/enrol/$courseId" params={{ courseId: course.id }}>
+                        {disabled ? "Registration closed" : "Enrol & pay"}
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button size="lg" variant="brand" disabled={disabled} onClick={() => !disabled && onEnroll(course)}>
+                      {disabled ? "Registration closed" : "Enroll Now"}
+                    </Button>
+                  )}
+
                 </div>
               </div>
             );
