@@ -616,7 +616,17 @@ function Admin() {
                         >
                           {c.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                         </button>
+                        <Link
+                          to="/course-builder/$courseId"
+                          params={{ courseId: c.id }}
+                          title="Open course builder"
+                          aria-label="Open course builder"
+                          className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"
+                        >
+                          <Wrench className="h-4 w-4" />
+                        </Link>
                         <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
+
                         <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </div>
