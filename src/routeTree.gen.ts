@@ -9,20 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedLearnIndexRouteImport } from './routes/_authenticated/learn.index'
 import { Route as AuthenticatedPaymentStatusRouteImport } from './routes/_authenticated/payment.status'
+import { Route as AuthenticatedLearnCourseIdRouteImport } from './routes/_authenticated/learn.$courseId'
 import { Route as AuthenticatedEnrolCourseIdRouteImport } from './routes/_authenticated/enrol.$courseId'
 import { Route as AuthenticatedCourseBuilderCourseIdRouteImport } from './routes/_authenticated/course-builder.$courseId'
 import { Route as AuthenticatedCheckoutOrderIdRouteImport } from './routes/_authenticated/checkout.$orderId'
 import { Route as ApiPublicWebhooksFlutterwaveRouteImport } from './routes/api/public/webhooks/flutterwave'
 
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -52,6 +60,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCertificatesRoute =
+  AuthenticatedCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -66,6 +80,12 @@ const AuthenticatedPaymentStatusRoute =
   AuthenticatedPaymentStatusRouteImport.update({
     id: '/payment/status',
     path: '/payment/status',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedLearnCourseIdRoute =
+  AuthenticatedLearnCourseIdRouteImport.update({
+    id: '/learn/$courseId',
+    path: '/learn/$courseId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedEnrolCourseIdRoute =
@@ -99,10 +119,13 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/verify': typeof VerifyRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
+  '/learn/$courseId': typeof AuthenticatedLearnCourseIdRoute
   '/payment/status': typeof AuthenticatedPaymentStatusRoute
   '/learn/': typeof AuthenticatedLearnIndexRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
@@ -113,10 +136,13 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/verify': typeof VerifyRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
+  '/learn/$courseId': typeof AuthenticatedLearnCourseIdRoute
   '/payment/status': typeof AuthenticatedPaymentStatusRoute
   '/learn': typeof AuthenticatedLearnIndexRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
@@ -129,10 +155,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/verify': typeof VerifyRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/_authenticated/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/_authenticated/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
+  '/_authenticated/learn/$courseId': typeof AuthenticatedLearnCourseIdRoute
   '/_authenticated/payment/status': typeof AuthenticatedPaymentStatusRoute
   '/_authenticated/learn/': typeof AuthenticatedLearnIndexRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
@@ -145,10 +174,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/unsubscribe'
+    | '/verify'
     | '/admin'
+    | '/certificates'
     | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
+    | '/learn/$courseId'
     | '/payment/status'
     | '/learn/'
     | '/api/public/webhooks/flutterwave'
@@ -159,10 +191,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/unsubscribe'
+    | '/verify'
     | '/admin'
+    | '/certificates'
     | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
+    | '/learn/$courseId'
     | '/payment/status'
     | '/learn'
     | '/api/public/webhooks/flutterwave'
@@ -174,10 +209,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/unsubscribe'
+    | '/verify'
     | '/_authenticated/admin'
+    | '/_authenticated/certificates'
     | '/_authenticated/checkout/$orderId'
     | '/_authenticated/course-builder/$courseId'
     | '/_authenticated/enrol/$courseId'
+    | '/_authenticated/learn/$courseId'
     | '/_authenticated/payment/status'
     | '/_authenticated/learn/'
     | '/api/public/webhooks/flutterwave'
@@ -190,11 +228,19 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CoursesRoute: typeof CoursesRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VerifyRoute: typeof VerifyRoute
   ApiPublicWebhooksFlutterwaveRoute: typeof ApiPublicWebhooksFlutterwaveRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -237,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/certificates': {
+      id: '/_authenticated/certificates'
+      path: '/certificates'
+      fullPath: '/certificates'
+      preLoaderRoute: typeof AuthenticatedCertificatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -256,6 +309,13 @@ declare module '@tanstack/react-router' {
       path: '/payment/status'
       fullPath: '/payment/status'
       preLoaderRoute: typeof AuthenticatedPaymentStatusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/learn/$courseId': {
+      id: '/_authenticated/learn/$courseId'
+      path: '/learn/$courseId'
+      fullPath: '/learn/$courseId'
+      preLoaderRoute: typeof AuthenticatedLearnCourseIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/enrol/$courseId': {
@@ -291,19 +351,23 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedCheckoutOrderIdRoute: typeof AuthenticatedCheckoutOrderIdRoute
   AuthenticatedCourseBuilderCourseIdRoute: typeof AuthenticatedCourseBuilderCourseIdRoute
   AuthenticatedEnrolCourseIdRoute: typeof AuthenticatedEnrolCourseIdRoute
+  AuthenticatedLearnCourseIdRoute: typeof AuthenticatedLearnCourseIdRoute
   AuthenticatedPaymentStatusRoute: typeof AuthenticatedPaymentStatusRoute
   AuthenticatedLearnIndexRoute: typeof AuthenticatedLearnIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedCheckoutOrderIdRoute: AuthenticatedCheckoutOrderIdRoute,
   AuthenticatedCourseBuilderCourseIdRoute:
     AuthenticatedCourseBuilderCourseIdRoute,
   AuthenticatedEnrolCourseIdRoute: AuthenticatedEnrolCourseIdRoute,
+  AuthenticatedLearnCourseIdRoute: AuthenticatedLearnCourseIdRoute,
   AuthenticatedPaymentStatusRoute: AuthenticatedPaymentStatusRoute,
   AuthenticatedLearnIndexRoute: AuthenticatedLearnIndexRoute,
 }
@@ -318,6 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CoursesRoute: CoursesRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VerifyRoute: VerifyRoute,
   ApiPublicWebhooksFlutterwaveRoute: ApiPublicWebhooksFlutterwaveRoute,
 }
 export const routeTree = rootRouteImport
