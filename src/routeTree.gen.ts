@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedEnrolCourseIdRouteImport } from './routes/_authenticated/enrol.$courseId'
 import { Route as AuthenticatedCourseBuilderCourseIdRouteImport } from './routes/_authenticated/course-builder.$courseId'
+import { Route as AuthenticatedCheckoutOrderIdRouteImport } from './routes/_authenticated/checkout.$orderId'
 import { Route as ApiPublicWebhooksFlutterwaveRouteImport } from './routes/api/public/webhooks/flutterwave'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -66,6 +67,12 @@ const AuthenticatedCourseBuilderCourseIdRoute =
     path: '/course-builder/$courseId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCheckoutOrderIdRoute =
+  AuthenticatedCheckoutOrderIdRouteImport.update({
+    id: '/checkout/$orderId',
+    path: '/checkout/$orderId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicWebhooksFlutterwaveRoute =
   ApiPublicWebhooksFlutterwaveRouteImport.update({
     id: '/api/public/webhooks/flutterwave',
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
@@ -104,6 +113,7 @@ export interface FileRoutesById {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/_authenticated/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/_authenticated/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/admin'
+    | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
     | '/api/public/webhooks/flutterwave'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/admin'
+    | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
     | '/api/public/webhooks/flutterwave'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/_authenticated/admin'
+    | '/_authenticated/checkout/$orderId'
     | '/_authenticated/course-builder/$courseId'
     | '/_authenticated/enrol/$courseId'
     | '/api/public/webhooks/flutterwave'
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCourseBuilderCourseIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/checkout/$orderId': {
+      id: '/_authenticated/checkout/$orderId'
+      path: '/checkout/$orderId'
+      fullPath: '/checkout/$orderId'
+      preLoaderRoute: typeof AuthenticatedCheckoutOrderIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/webhooks/flutterwave': {
       id: '/api/public/webhooks/flutterwave'
       path: '/api/public/webhooks/flutterwave'
@@ -232,12 +252,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCheckoutOrderIdRoute: typeof AuthenticatedCheckoutOrderIdRoute
   AuthenticatedCourseBuilderCourseIdRoute: typeof AuthenticatedCourseBuilderCourseIdRoute
   AuthenticatedEnrolCourseIdRoute: typeof AuthenticatedEnrolCourseIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCheckoutOrderIdRoute: AuthenticatedCheckoutOrderIdRoute,
   AuthenticatedCourseBuilderCourseIdRoute:
     AuthenticatedCourseBuilderCourseIdRoute,
   AuthenticatedEnrolCourseIdRoute: AuthenticatedEnrolCourseIdRoute,
