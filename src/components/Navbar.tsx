@@ -60,6 +60,11 @@ export function Navbar() {
               {l.label}
             </Link>
           ))}
+          {user && (
+            <Link to="/learn" className="px-4 py-2 text-sm font-medium hover:bg-secondary rounded-full">
+              My Learning
+            </Link>
+          )}
           {isAdmin && (
             <Link to="/admin" className="px-4 py-2 text-sm font-medium text-[var(--ocean)] hover:bg-secondary rounded-full inline-flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4" /> Admin
@@ -105,6 +110,11 @@ export function Navbar() {
               {l.label}
             </Link>
           ))}
+          {user && (
+            <Link to="/learn" onClick={() => setOpen(false)} className="block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-secondary">
+              My Learning
+            </Link>
+          )}
           {isAdmin && (
             <Link to="/admin" onClick={() => setOpen(false)} className="block px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-secondary text-[var(--ocean)]">
               Admin
