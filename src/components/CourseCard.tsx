@@ -42,8 +42,18 @@ export function CourseCard({ course, onClick }: { course: CourseCardData; onClic
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.5 }}
-      className="group relative overflow-hidden rounded-3xl bg-card border border-border/60 soft-shadow hover:-translate-y-1 hover:shadow-[0_25px_60px_-20px_oklch(0.34_0.12_265/0.35)] transition-all duration-500"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={`group relative overflow-hidden rounded-3xl bg-card border border-border/60 soft-shadow hover:-translate-y-1 hover:shadow-[0_25px_60px_-20px_oklch(0.34_0.12_265/0.35)] transition-all duration-500 ${onClick ? "cursor-pointer" : ""}`}
     >
+
       <div className="relative aspect-[16/10] overflow-hidden bg-secondary">
         {course.thumbnail_url && (
           <img
