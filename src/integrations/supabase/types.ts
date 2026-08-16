@@ -412,7 +412,7 @@ export type Database = {
           registration_end?: string | null
           registration_start?: string | null
           reviews_enabled?: boolean
-          slug: string
+          slug?: string
           target_audience?: string | null
           thumbnail_url?: string | null
           title: string
