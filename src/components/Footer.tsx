@@ -45,6 +45,7 @@ export function Footer() {
             <li><Link to="/about" className="hover:text-foreground">About</Link></li>
             <li><a href="#" className="hover:text-foreground">Mentorship</a></li>
             <li><a href="#" className="hover:text-foreground">Community</a></li>
+            <li><Link to="/verify" className="hover:text-foreground">Verify a certificate</Link></li>
           </ul>
         </div>
         <div>
