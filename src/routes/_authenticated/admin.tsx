@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff, Eye, EyeOff } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Upload, Loader2, ShieldAlert, Mail, Users, GraduationCap, Handshake, Search, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Pin, PinOff, Eye, EyeOff, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -616,7 +616,17 @@ function Admin() {
                         >
                           {c.published ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                         </button>
+                        <Link
+                          to="/course-builder/$courseId"
+                          params={{ courseId: c.id }}
+                          title="Open course builder"
+                          aria-label="Open course builder"
+                          className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"
+                        >
+                          <Wrench className="h-4 w-4" />
+                        </Link>
                         <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
+
                         <button onClick={() => remove(c.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </div>

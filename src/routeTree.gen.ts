@@ -16,6 +16,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedCourseBuilderCourseIdRouteImport } from './routes/_authenticated/course-builder.$courseId'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -51,6 +52,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedCourseBuilderCourseIdRoute =
+  AuthenticatedCourseBuilderCourseIdRouteImport.update({
+    id: '/course-builder/$courseId',
+    path: '/course-builder/$courseId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,6 +75,7 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,12 +86,27 @@ export interface FileRoutesById {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/auth' | '/courses' | '/unsubscribe' | '/admin'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/courses'
+    | '/unsubscribe'
+    | '/admin'
+    | '/course-builder/$courseId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/auth' | '/courses' | '/unsubscribe' | '/admin'
+  to:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/courses'
+    | '/unsubscribe'
+    | '/admin'
+    | '/course-builder/$courseId'
   id:
     | '__root__'
     | '/'
@@ -92,6 +116,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/_authenticated/admin'
+    | '/_authenticated/course-builder/$courseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -154,15 +179,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/course-builder/$courseId': {
+      id: '/_authenticated/course-builder/$courseId'
+      path: '/course-builder/$courseId'
+      fullPath: '/course-builder/$courseId'
+      preLoaderRoute: typeof AuthenticatedCourseBuilderCourseIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCourseBuilderCourseIdRoute: typeof AuthenticatedCourseBuilderCourseIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCourseBuilderCourseIdRoute:
+    AuthenticatedCourseBuilderCourseIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
