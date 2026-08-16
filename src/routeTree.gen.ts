@@ -17,6 +17,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedLearnIndexRouteImport } from './routes/_authenticated/learn.index'
+import { Route as AuthenticatedPaymentStatusRouteImport } from './routes/_authenticated/payment.status'
 import { Route as AuthenticatedEnrolCourseIdRouteImport } from './routes/_authenticated/enrol.$courseId'
 import { Route as AuthenticatedCourseBuilderCourseIdRouteImport } from './routes/_authenticated/course-builder.$courseId'
 import { Route as AuthenticatedCheckoutOrderIdRouteImport } from './routes/_authenticated/checkout.$orderId'
@@ -61,6 +62,12 @@ const AuthenticatedLearnIndexRoute = AuthenticatedLearnIndexRouteImport.update({
   path: '/learn/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPaymentStatusRoute =
+  AuthenticatedPaymentStatusRouteImport.update({
+    id: '/payment/status',
+    path: '/payment/status',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedEnrolCourseIdRoute =
   AuthenticatedEnrolCourseIdRouteImport.update({
     id: '/enrol/$courseId',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
+  '/payment/status': typeof AuthenticatedPaymentStatusRoute
   '/learn/': typeof AuthenticatedLearnIndexRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
+  '/payment/status': typeof AuthenticatedPaymentStatusRoute
   '/learn': typeof AuthenticatedLearnIndexRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
@@ -124,6 +133,7 @@ export interface FileRoutesById {
   '/_authenticated/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/_authenticated/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/_authenticated/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
+  '/_authenticated/payment/status': typeof AuthenticatedPaymentStatusRoute
   '/_authenticated/learn/': typeof AuthenticatedLearnIndexRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
+    | '/payment/status'
     | '/learn/'
     | '/api/public/webhooks/flutterwave'
   fileRoutesByTo: FileRoutesByTo
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
+    | '/payment/status'
     | '/learn'
     | '/api/public/webhooks/flutterwave'
   id:
@@ -166,6 +178,7 @@ export interface FileRouteTypes {
     | '/_authenticated/checkout/$orderId'
     | '/_authenticated/course-builder/$courseId'
     | '/_authenticated/enrol/$courseId'
+    | '/_authenticated/payment/status'
     | '/_authenticated/learn/'
     | '/api/public/webhooks/flutterwave'
   fileRoutesById: FileRoutesById
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLearnIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/payment/status': {
+      id: '/_authenticated/payment/status'
+      path: '/payment/status'
+      fullPath: '/payment/status'
+      preLoaderRoute: typeof AuthenticatedPaymentStatusRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/enrol/$courseId': {
       id: '/_authenticated/enrol/$courseId'
       path: '/enrol/$courseId'
@@ -274,6 +294,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCheckoutOrderIdRoute: typeof AuthenticatedCheckoutOrderIdRoute
   AuthenticatedCourseBuilderCourseIdRoute: typeof AuthenticatedCourseBuilderCourseIdRoute
   AuthenticatedEnrolCourseIdRoute: typeof AuthenticatedEnrolCourseIdRoute
+  AuthenticatedPaymentStatusRoute: typeof AuthenticatedPaymentStatusRoute
   AuthenticatedLearnIndexRoute: typeof AuthenticatedLearnIndexRoute
 }
 
@@ -283,6 +304,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCourseBuilderCourseIdRoute:
     AuthenticatedCourseBuilderCourseIdRoute,
   AuthenticatedEnrolCourseIdRoute: AuthenticatedEnrolCourseIdRoute,
+  AuthenticatedPaymentStatusRoute: AuthenticatedPaymentStatusRoute,
   AuthenticatedLearnIndexRoute: AuthenticatedLearnIndexRoute,
 }
 
