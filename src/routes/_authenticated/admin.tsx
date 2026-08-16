@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { PaymentIntegration } from "@/components/admin/PaymentIntegration";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Vermaak Academy" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -67,7 +68,7 @@ const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   credit_cost: 0,
 };
 
-type Tab = "courses" | "enrollments" | "partners" | "subscribers" | "credits";
+type Tab = "courses" | "enrollments" | "partners" | "subscribers" | "credits" | "payments";
 
 type CreditBalance = { email: string; balance: number; updated_at: string };
 type CreditTx = { id: string; email: string; amount: number; type: string; reason: string; course_title: string | null; created_at: string };
@@ -516,6 +517,7 @@ function Admin() {
     { id: "partners", label: `Partners (${partners.length})` },
     { id: "subscribers", label: `Subscribers (${subs.length})` },
     { id: "credits", label: `Credits (${balances.length})` },
+    { id: "payments", label: "Payments" },
   ];
 
   const selectCls = "h-10 px-3 rounded-lg bg-background border border-border text-sm";
@@ -969,6 +971,8 @@ function Admin() {
               <Pager page={subPage} setPage={setSubPage} total={filteredSubs.length} />
             </div>
           )}
+
+          {tab === "payments" && <PaymentIntegration />}
 
           {tab === "credits" && (() => {
             const q = credQ.toLowerCase().trim();
