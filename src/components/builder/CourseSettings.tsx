@@ -73,7 +73,7 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
 
   async function save() {
     setBusy(true);
-    const payload: Record<string, any> = {
+    const payload = {
       course_type: f.course_type,
       price_ugx: Number(f.price_ugx) || 0,
       discount_price_ugx: f.discount_price_ugx === "" ? null : Number(f.discount_price_ugx),
@@ -91,7 +91,7 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
         min_score: Number(f.min_score) || 0,
       },
     };
-    const { error } = await supabase.from("courses").update(payload).eq("id", course.id);
+    const { error } = await supabase.from("courses").update(payload as any).eq("id", course.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Course settings saved");
