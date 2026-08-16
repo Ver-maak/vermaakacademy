@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedCertificatesRouteImport } from './routes/_authenticated/certificates'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedLearnIndexRouteImport } from './routes/_authenticated/learn.index'
 import { Route as AuthenticatedPaymentStatusRouteImport } from './routes/_authenticated/payment.status'
@@ -53,6 +54,12 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCertificatesRoute =
+  AuthenticatedCertificatesRouteImport.update({
+    id: '/certificates',
+    path: '/certificates',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
@@ -122,6 +130,7 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/certificates': typeof AuthenticatedCertificatesRoute
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
@@ -139,6 +148,7 @@ export interface FileRoutesById {
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
   '/_authenticated/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
   '/_authenticated/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/admin'
+    | '/certificates'
     | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/admin'
+    | '/certificates'
     | '/checkout/$orderId'
     | '/course-builder/$courseId'
     | '/enrol/$courseId'
@@ -187,6 +199,7 @@ export interface FileRouteTypes {
     | '/courses'
     | '/unsubscribe'
     | '/_authenticated/admin'
+    | '/_authenticated/certificates'
     | '/_authenticated/checkout/$orderId'
     | '/_authenticated/course-builder/$courseId'
     | '/_authenticated/enrol/$courseId'
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/certificates': {
+      id: '/_authenticated/certificates'
+      path: '/certificates'
+      fullPath: '/certificates'
+      preLoaderRoute: typeof AuthenticatedCertificatesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -311,6 +331,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedCertificatesRoute: typeof AuthenticatedCertificatesRoute
   AuthenticatedCheckoutOrderIdRoute: typeof AuthenticatedCheckoutOrderIdRoute
   AuthenticatedCourseBuilderCourseIdRoute: typeof AuthenticatedCourseBuilderCourseIdRoute
   AuthenticatedEnrolCourseIdRoute: typeof AuthenticatedEnrolCourseIdRoute
@@ -321,6 +342,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedCertificatesRoute: AuthenticatedCertificatesRoute,
   AuthenticatedCheckoutOrderIdRoute: AuthenticatedCheckoutOrderIdRoute,
   AuthenticatedCourseBuilderCourseIdRoute:
     AuthenticatedCourseBuilderCourseIdRoute,
