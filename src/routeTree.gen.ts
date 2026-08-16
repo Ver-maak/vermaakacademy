@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -25,6 +26,11 @@ import { Route as AuthenticatedCourseBuilderCourseIdRouteImport } from './routes
 import { Route as AuthenticatedCheckoutOrderIdRouteImport } from './routes/_authenticated/checkout.$orderId'
 import { Route as ApiPublicWebhooksFlutterwaveRouteImport } from './routes/api/public/webhooks/flutterwave'
 
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/verify': typeof VerifyRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/verify': typeof VerifyRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/certificates': typeof AuthenticatedCertificatesRoute
   '/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/courses': typeof CoursesRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/verify': typeof VerifyRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/certificates': typeof AuthenticatedCertificatesRoute
   '/_authenticated/checkout/$orderId': typeof AuthenticatedCheckoutOrderIdRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/unsubscribe'
+    | '/verify'
     | '/admin'
     | '/certificates'
     | '/checkout/$orderId'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/unsubscribe'
+    | '/verify'
     | '/admin'
     | '/certificates'
     | '/checkout/$orderId'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/courses'
     | '/unsubscribe'
+    | '/verify'
     | '/_authenticated/admin'
     | '/_authenticated/certificates'
     | '/_authenticated/checkout/$orderId'
@@ -216,11 +228,19 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CoursesRoute: typeof CoursesRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  VerifyRoute: typeof VerifyRoute
   ApiPublicWebhooksFlutterwaveRoute: typeof ApiPublicWebhooksFlutterwaveRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/unsubscribe': {
       id: '/unsubscribe'
       path: '/unsubscribe'
@@ -362,6 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CoursesRoute: CoursesRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  VerifyRoute: VerifyRoute,
   ApiPublicWebhooksFlutterwaveRoute: ApiPublicWebhooksFlutterwaveRoute,
 }
 export const routeTree = rootRouteImport

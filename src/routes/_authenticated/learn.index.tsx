@@ -42,7 +42,10 @@ function MyLearning() {
       <main className="flex-1 pt-28 pb-20 px-4">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2">My Learning</h1>
-          <p className="text-muted-foreground mb-8">Everything you are enrolled in, in one place.</p>
+          <p className="text-muted-foreground mb-8">
+            Everything you are enrolled in, in one place.{" "}
+            <Link to="/certificates" className="text-[var(--ocean)] hover:underline">View my certificates</Link>
+          </p>
 
           {loading ? (
             <div className="py-16 grid place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
@@ -70,7 +73,12 @@ function MyLearning() {
                       <div className="h-2 rounded-full bg-secondary overflow-hidden mb-2">
                         <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
                       </div>
-                      <p className="text-xs text-muted-foreground">{pct}% complete · {e.status}</p>
+                      <p className="text-xs text-muted-foreground mb-3">{pct}% complete · {e.status}</p>
+                      <Button asChild variant="brand" size="sm" className="w-full">
+                        <Link to="/learn/$courseId" params={{ courseId: e.course_id }}>
+                          {pct > 0 ? "Continue" : "Start course"}
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 );
