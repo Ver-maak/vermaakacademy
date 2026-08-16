@@ -16,6 +16,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedEnrolCourseIdRouteImport } from './routes/_authenticated/enrol.$courseId'
 import { Route as AuthenticatedCourseBuilderCourseIdRouteImport } from './routes/_authenticated/course-builder.$courseId'
 import { Route as ApiPublicWebhooksFlutterwaveRouteImport } from './routes/api/public/webhooks/flutterwave'
 
@@ -53,6 +54,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEnrolCourseIdRoute =
+  AuthenticatedEnrolCourseIdRouteImport.update({
+    id: '/enrol/$courseId',
+    path: '/enrol/$courseId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCourseBuilderCourseIdRoute =
   AuthenticatedCourseBuilderCourseIdRouteImport.update({
     id: '/course-builder/$courseId',
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
+  '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
 export interface FileRoutesByTo {
@@ -84,6 +92,7 @@ export interface FileRoutesByTo {
   '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
+  '/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
 export interface FileRoutesById {
@@ -96,6 +105,7 @@ export interface FileRoutesById {
   '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/course-builder/$courseId': typeof AuthenticatedCourseBuilderCourseIdRoute
+  '/_authenticated/enrol/$courseId': typeof AuthenticatedEnrolCourseIdRoute
   '/api/public/webhooks/flutterwave': typeof ApiPublicWebhooksFlutterwaveRoute
 }
 export interface FileRouteTypes {
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/admin'
     | '/course-builder/$courseId'
+    | '/enrol/$courseId'
     | '/api/public/webhooks/flutterwave'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/admin'
     | '/course-builder/$courseId'
+    | '/enrol/$courseId'
     | '/api/public/webhooks/flutterwave'
   id:
     | '__root__'
@@ -129,6 +141,7 @@ export interface FileRouteTypes {
     | '/unsubscribe'
     | '/_authenticated/admin'
     | '/_authenticated/course-builder/$courseId'
+    | '/_authenticated/enrol/$courseId'
     | '/api/public/webhooks/flutterwave'
   fileRoutesById: FileRoutesById
 }
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/enrol/$courseId': {
+      id: '/_authenticated/enrol/$courseId'
+      path: '/enrol/$courseId'
+      fullPath: '/enrol/$courseId'
+      preLoaderRoute: typeof AuthenticatedEnrolCourseIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/course-builder/$courseId': {
       id: '/_authenticated/course-builder/$courseId'
       path: '/course-builder/$courseId'
@@ -213,12 +233,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCourseBuilderCourseIdRoute: typeof AuthenticatedCourseBuilderCourseIdRoute
+  AuthenticatedEnrolCourseIdRoute: typeof AuthenticatedEnrolCourseIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedCourseBuilderCourseIdRoute:
     AuthenticatedCourseBuilderCourseIdRoute,
+  AuthenticatedEnrolCourseIdRoute: AuthenticatedEnrolCourseIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
