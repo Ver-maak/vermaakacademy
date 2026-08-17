@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PaymentIntegration } from "@/components/admin/PaymentIntegration";
 import { CertificatesAdmin } from "@/components/admin/CertificatesAdmin";
 import { ReviewsAdmin } from "@/components/admin/ReviewsAdmin";
+import { SiteSettings } from "@/components/admin/SiteSettings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Vermaak Academy" }, { name: "robots", content: "noindex, nofollow" }] }),
@@ -70,7 +71,7 @@ const emptyForm: Omit<CourseRow, "id" | "pinned_at"> = {
   credit_cost: 0,
 };
 
-type Tab = "courses" | "enrollments" | "partners" | "subscribers" | "credits" | "certificates" | "reviews" | "payments";
+type Tab = "courses" | "enrollments" | "partners" | "subscribers" | "credits" | "certificates" | "reviews" | "payments" | "settings";
 
 type CreditBalance = { email: string; balance: number; updated_at: string };
 type CreditTx = { id: string; email: string; amount: number; type: string; reason: string; course_title: string | null; created_at: string };
@@ -522,6 +523,7 @@ function Admin() {
     { id: "certificates", label: "Certificates" },
     { id: "reviews", label: "Reviews" },
     { id: "payments", label: "Payments" },
+    { id: "settings", label: "Settings" },
   ];
 
   const selectCls = "h-10 px-3 rounded-lg bg-background border border-border text-sm";
@@ -625,11 +627,11 @@ function Admin() {
                         <Link
                           to="/course-builder/$courseId"
                           params={{ courseId: c.id }}
-                          title="Open course builder"
-                          aria-label="Open course builder"
-                          className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"
+                          title="Course settings, curriculum & quizzes"
+                          aria-label="Open course settings and builder"
+                          className="h-9 px-3 rounded-full border border-border/60 hover:bg-secondary inline-flex items-center justify-center gap-1.5 text-xs font-medium"
                         >
-                          <Wrench className="h-4 w-4" />
+                          <Wrench className="h-4 w-4" /> Settings
                         </Link>
                         <button onClick={() => startEdit(c)} className="h-9 w-9 rounded-full hover:bg-secondary inline-flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
 
@@ -979,6 +981,8 @@ function Admin() {
           {tab === "certificates" && <CertificatesAdmin />}
 
           {tab === "reviews" && <ReviewsAdmin />}
+
+          {tab === "settings" && <SiteSettings />}
 
           {tab === "payments" && <PaymentIntegration />}
 

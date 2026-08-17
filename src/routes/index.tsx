@@ -78,18 +78,21 @@ function Home() {
       .then(({ data }) => setFeatured((data as CourseDetails[]) ?? []));
 
     (async () => {
-      const [enrollRes, courseRes, partnerRes] = await Promise.all([
+      const [enrollRes, courseRes, partnerRes, settingsRes] = await Promise.all([
         supabase.from("course_enrollments").select("*", { count: "exact", head: true }).eq("status", "enrolled"),
         supabase.from("courses").select("*", { count: "exact", head: true }).eq("published", true),
         supabase.from("partner_inquiries").select("*", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("site_settings").select("value").eq("key", "general").maybeSingle(),
       ]);
+      const s = (settingsRes.data?.value ?? {}) as { base_students?: number; base_partners?: number; countries?: number };
       setStats([
-        { value: 500 + (enrollRes.count ?? 0), suffix: "+", label: "Students enrolled" },
+        { value: (s.base_students ?? 500) + (enrollRes.count ?? 0), suffix: "+", label: "Students enrolled" },
         { value: courseRes.count ?? 0, suffix: "+", label: "Active courses" },
-        { value: 3 + (partnerRes.count ?? 0), suffix: "+", label: "Partner organisations" },
-        { value: 2, suffix: "", label: "Countries reached" },
+        { value: (s.base_partners ?? 3) + (partnerRes.count ?? 0), suffix: "+", label: "Partner organisations" },
+        { value: s.countries ?? 2, suffix: "", label: "Countries reached" },
       ]);
     })();
+
   }, []);
 
   return (

@@ -1,9 +1,33 @@
 import { Link } from "@tanstack/react-router";
-import { Github, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Github, Twitter, Instagram, Linkedin, Mail, Phone } from "lucide-react";
 import { Logo } from "./Logo";
 import { NewsletterForm } from "./NewsletterForm";
+import { supabase } from "@/integrations/supabase/client";
+
+type Contact = { contact_email?: string; contact_phone?: string; cities?: string; facebook?: string; instagram?: string; linkedin?: string; x?: string };
 
 export function Footer() {
+  const [c, setC] = useState<Contact>({});
+
+  useEffect(() => {
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "general")
+      .maybeSingle()
+      .then(({ data }) => setC((data?.value ?? {}) as Contact));
+  }, []);
+
+  const socials: { Icon: typeof Twitter; href: string; label: string }[] = [
+    { Icon: Twitter, href: c.x || "#", label: "X" },
+    { Icon: Instagram, href: c.instagram || "#", label: "Instagram" },
+    { Icon: Linkedin, href: c.linkedin || "#", label: "LinkedIn" },
+    { Icon: Github, href: c.facebook || "#", label: "Facebook" },
+  ];
+
+  const email = c.contact_email || "vermaakinc1@gmail.com";
+
   return (
     <footer className="relative mt-32 border-t border-border/60 bg-gradient-to-b from-background to-secondary/40">
       <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[var(--cyan)]/60 to-transparent" />
@@ -26,11 +50,13 @@ export function Footer() {
             digital skills, mentorship, and a community that ships.
           </p>
           <div className="mt-5 flex gap-2">
-            {[Twitter, Instagram, Linkedin, Github].map((Icon, i) => (
+            {socials.map(({ Icon, href, label }) => (
               <a
-                key={i}
-                href="#"
-                aria-label="Social link"
+                key={label}
+                href={href}
+                target={href === "#" ? undefined : "_blank"}
+                rel={href === "#" ? undefined : "noreferrer"}
+                aria-label={label}
                 className="h-9 w-9 inline-flex items-center justify-center rounded-full bg-secondary hover:bg-[var(--cyan)] hover:text-white transition-colors"
               >
                 <Icon className="h-4 w-4" />
@@ -51,8 +77,11 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold mb-4">Contact</h4>
           <ul className="space-y-2.5 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href="mailto:vermaakinc1@gmail.com" className="hover:text-foreground">vermaakinc1@gmail.com</a></li>
-            <li>Kampala · Nairobi</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4" /> <a href={`mailto:${email}`} className="hover:text-foreground">{email}</a></li>
+            {c.contact_phone && (
+              <li className="flex items-center gap-2"><Phone className="h-4 w-4" /> <a href={`tel:${c.contact_phone}`} className="hover:text-foreground">{c.contact_phone}</a></li>
+            )}
+            <li>{c.cities || "Kampala · Nairobi"}</li>
           </ul>
         </div>
       </div>
