@@ -85,8 +85,9 @@ function Builder() {
             <>
               <h1 className="text-3xl font-bold mb-1">{course.title}</h1>
               <p className="text-muted-foreground mb-6 text-sm">
-                {course.published ? "Published" : "Draft"} · {course.course_type?.replace("_", "-")} · {course.category}
+                {course.archived_at ? "Hidden" : course.published ? "Published" : "Draft"} · {course.course_type?.replace("_", "-")} · {course.category}
               </p>
+
 
               <div className="flex flex-wrap gap-2 mb-6">
                 {tabs.map((t) => (
