@@ -72,7 +72,7 @@ export function SiteSettings() {
     setSaving(true);
     const { error } = await supabase
       .from("site_settings")
-      .upsert({ key: "general", value: form as unknown as Record<string, unknown>, updated_at: new Date().toISOString() });
+      .upsert({ key: "general", value: form as never, updated_at: new Date().toISOString() });
     setSaving(false);
     if (error) return toast.error(error.message);
     toast.success("Settings saved");
