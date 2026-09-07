@@ -250,6 +250,19 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
           <label className={labelCls}>Credit cost</label>
           <input type="number" min={0} className={inputCls} value={f.credit_cost} onChange={(e) => setF({ ...f, credit_cost: e.target.value as any })} />
         </div>
+        <div className="sm:col-span-2">
+          <label className={labelCls}>Payment link (optional)</label>
+          <input
+            type="url"
+            placeholder="https://flutterwave.com/pay/your-course-link"
+            className={inputCls}
+            value={f.payment_link}
+            onChange={(e) => setF({ ...f, payment_link: e.target.value })}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Paste a hosted payment page. Learners are sent straight here to pay as soon as they finish registering for this course.
+          </p>
+        </div>
         <div>
           <label className={labelCls}>Estimated minutes</label>
           <input type="number" min={0} className={inputCls} value={f.estimated_minutes} onChange={(e) => setF({ ...f, estimated_minutes: e.target.value as any })} />
