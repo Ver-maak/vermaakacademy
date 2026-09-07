@@ -32,7 +32,7 @@ function Checkout() {
     (async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id,order_number,amount,currency,status,course_id,courses(title,thumbnail_url)")
+        .select("id,order_number,amount,currency,status,course_id,courses(title,thumbnail_url,payment_link)")
         .eq("id", orderId)
         .maybeSingle();
       setOrder(data ?? null);
