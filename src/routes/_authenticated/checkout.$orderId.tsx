@@ -32,7 +32,7 @@ function Checkout() {
     (async () => {
       const { data } = await supabase
         .from("orders")
-        .select("id,order_number,amount,currency,status,course_id,courses(title,thumbnail_url)")
+        .select("id,order_number,amount,currency,status,course_id,courses(title,thumbnail_url,payment_link)")
         .eq("id", orderId)
         .maybeSingle();
       setOrder(data ?? null);
@@ -89,6 +89,17 @@ function Checkout() {
                   <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">Payment received — you now have access.</p>
                   <Button asChild className="w-full"><Link to="/learn">Go to My Learning</Link></Button>
                 </div>
+              ) : (order.courses?.payment_link ?? "").trim() ? (
+                <>
+                  <Button asChild className="w-full">
+                    <a href={String(order.courses.payment_link).trim()}>
+                      <CreditCard className="h-4 w-4 mr-2" /> Pay now
+                    </a>
+                  </Button>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5" /> You'll be taken to our secure payment page. Send us your receipt if access isn't granted automatically.
+                  </p>
+                </>
               ) : (
                 <>
                   <Button onClick={pay} disabled={busy} className="w-full">

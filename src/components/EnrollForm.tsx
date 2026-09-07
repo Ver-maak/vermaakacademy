@@ -87,6 +87,15 @@ export function EnrollForm({ open, onClose, course }: Props) {
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Enrollment received — we'll email you the next steps.");
+    if (course?.id) {
+      const { data: c } = await supabase.from("courses").select("payment_link").eq("id", course.id).maybeSingle();
+      const link = ((c as any)?.payment_link ?? "").trim();
+      if (link) {
+        toast.success("Taking you to payment…");
+        window.location.href = link;
+        return;
+      }
+    }
     setForm({
       name: "", email: "", phone: "", country: "", city: "",
       age_range: "", gender: "", occupation: "", education_level: "",

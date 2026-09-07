@@ -48,6 +48,7 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
     price_ugx: course.price_ugx ?? 0,
     discount_price_ugx: course.discount_price_ugx ?? "",
     credit_cost: course.credit_cost ?? 0,
+    payment_link: course.payment_link ?? "",
     category_id: course.category_id ?? "",
     instructor_id: course.instructor_id ?? "",
     target_audience: course.target_audience ?? "",
@@ -112,6 +113,7 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
       price_ugx: Number(s.price_ugx) || 0,
       discount_price_ugx: s.discount_price_ugx === "" ? null : Number(s.discount_price_ugx),
       credit_cost: Number(s.credit_cost) || 0,
+      payment_link: s.payment_link.trim() || null,
       category_id: s.category_id || null,
       instructor_id: s.instructor_id || null,
       target_audience: s.target_audience || null,
@@ -247,6 +249,19 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
         <div>
           <label className={labelCls}>Credit cost</label>
           <input type="number" min={0} className={inputCls} value={f.credit_cost} onChange={(e) => setF({ ...f, credit_cost: e.target.value as any })} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={labelCls}>Payment link (optional)</label>
+          <input
+            type="url"
+            placeholder="https://flutterwave.com/pay/your-course-link"
+            className={inputCls}
+            value={f.payment_link}
+            onChange={(e) => setF({ ...f, payment_link: e.target.value })}
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Paste a hosted payment page. Learners are sent straight here to pay as soon as they finish registering for this course.
+          </p>
         </div>
         <div>
           <label className={labelCls}>Estimated minutes</label>

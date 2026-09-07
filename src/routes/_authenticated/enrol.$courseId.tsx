@@ -46,7 +46,7 @@ function Enrol() {
   useEffect(() => {
     (async () => {
       const [{ data: c }, { data: auth }] = await Promise.all([
-        supabase.from("courses").select("id,title,price_ugx,discount_price_ugx,currency,thumbnail_url,duration,level").eq("id", courseId).maybeSingle(),
+        supabase.from("courses").select("id,title,price_ugx,discount_price_ugx,currency,thumbnail_url,duration,level,payment_link").eq("id", courseId).maybeSingle(),
         supabase.auth.getUser(),
       ]);
       setCourse(c ?? null);
@@ -86,6 +86,12 @@ function Enrol() {
       if (res.amount === 0) {
         toast.success("Enrolment complete — happy learning!");
         navigate({ to: "/learn" });
+        return;
+      }
+      const link = (course?.payment_link ?? "").trim();
+      if (link) {
+        toast.success("Registration saved — taking you to payment…");
+        window.location.href = link;
         return;
       }
       navigate({ to: "/checkout/$orderId", params: { orderId: res.orderId! } });
