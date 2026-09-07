@@ -113,6 +113,7 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
       price_ugx: Number(s.price_ugx) || 0,
       discount_price_ugx: s.discount_price_ugx === "" ? null : Number(s.discount_price_ugx),
       credit_cost: Number(s.credit_cost) || 0,
+      payment_link: s.payment_link.trim() || null,
       category_id: s.category_id || null,
       instructor_id: s.instructor_id || null,
       target_audience: s.target_audience || null,
