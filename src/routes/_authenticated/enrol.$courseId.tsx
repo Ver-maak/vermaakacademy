@@ -88,6 +88,12 @@ function Enrol() {
         navigate({ to: "/learn" });
         return;
       }
+      const link = (course?.payment_link ?? "").trim();
+      if (link) {
+        toast.success("Registration saved — taking you to payment…");
+        window.location.href = link;
+        return;
+      }
       navigate({ to: "/checkout/$orderId", params: { orderId: res.orderId! } });
     } catch (err: any) {
       toast.error(err?.message ?? "Could not submit your application");
