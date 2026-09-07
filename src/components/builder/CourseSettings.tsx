@@ -48,6 +48,7 @@ export function CourseSettings({ course, onSaved }: { course: any; onSaved: () =
     price_ugx: course.price_ugx ?? 0,
     discount_price_ugx: course.discount_price_ugx ?? "",
     credit_cost: course.credit_cost ?? 0,
+    payment_link: course.payment_link ?? "",
     category_id: course.category_id ?? "",
     instructor_id: course.instructor_id ?? "",
     target_audience: course.target_audience ?? "",
