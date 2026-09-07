@@ -410,6 +410,7 @@ export type Database = {
           instructor_id: string | null
           level: string
           modules: Json
+          payment_link: string | null
           pinned: boolean
           pinned_at: string | null
           prerequisites: string | null
@@ -449,6 +450,7 @@ export type Database = {
           instructor_id?: string | null
           level?: string
           modules?: Json
+          payment_link?: string | null
           pinned?: boolean
           pinned_at?: string | null
           prerequisites?: string | null
@@ -488,6 +490,7 @@ export type Database = {
           instructor_id?: string | null
           level?: string
           modules?: Json
+          payment_link?: string | null
           pinned?: boolean
           pinned_at?: string | null
           prerequisites?: string | null
