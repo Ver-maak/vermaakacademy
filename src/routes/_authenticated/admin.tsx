@@ -825,9 +825,11 @@ function Admin() {
                       <div className="flex items-center gap-2">
                         <select value={e.status} onChange={(ev) => setEnrollStatusUpdate(e.id, ev.target.value)} className="h-9 px-2 text-xs rounded-lg bg-background border border-border">
                           <option value="new">New</option>
+                          <option value="awaiting_payment">Awaiting payment</option>
                           <option value="contacted">Contacted</option>
                           <option value="enrolled">Enrolled</option>
                           <option value="rejected">Rejected</option>
+
                         </select>
                         <button onClick={() => removeEnroll(e.id)} className="h-9 w-9 rounded-full hover:bg-destructive/10 text-destructive inline-flex items-center justify-center"><Trash2 className="h-4 w-4" /></button>
                       </div>
