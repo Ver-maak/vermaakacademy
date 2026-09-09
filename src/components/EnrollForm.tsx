@@ -79,23 +79,30 @@ export function EnrollForm({ open, onClose, course }: Props) {
       }
     }
 
+    // Paid course with a payment page: hold the details as "awaiting payment"
+    // and send them to pay first — they only become enrolled once payment lands.
+    let paymentLink = "";
+    if (course?.id && (course.credit_cost ?? 0) === 0) {
+      const { data: c } = await supabase.from("courses").select("payment_link").eq("id", course.id).maybeSingle();
+      paymentLink = String((c as any)?.payment_link ?? "").trim();
+    }
+
     const { error } = await supabase.from("course_enrollments").insert({
       ...parsed.data,
       course_id: course?.id ?? null,
       course_title: course?.title ?? "General interest",
+      ...(paymentLink ? { status: "awaiting_payment" } : {}),
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Enrollment received — we'll email you the next steps.");
-    if (course?.id) {
-      const { data: c } = await supabase.from("courses").select("payment_link").eq("id", course.id).maybeSingle();
-      const link = ((c as any)?.payment_link ?? "").trim();
-      if (link) {
-        toast.success("Taking you to payment…");
-        window.location.href = link;
-        return;
-      }
+
+    if (paymentLink) {
+      toast.success("Almost there — complete your payment to confirm your place.");
+      window.location.href = paymentLink;
+      return;
     }
+    toast.success("Enrollment received — we'll email you the next steps.");
+
     setForm({
       name: "", email: "", phone: "", country: "", city: "",
       age_range: "", gender: "", occupation: "", education_level: "",
