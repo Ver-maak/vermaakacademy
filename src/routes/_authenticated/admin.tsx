@@ -778,9 +778,11 @@ function Admin() {
                 <select value={enrollStatus} onChange={(e) => setEnrollStatusFilter(e.target.value)} className={selectCls}>
                   <option value="all">All statuses</option>
                   <option value="new">New</option>
+                  <option value="awaiting_payment">Awaiting payment</option>
                   <option value="contacted">Contacted</option>
                   <option value="enrolled">Enrolled</option>
                   <option value="rejected">Rejected</option>
+
                 </select>
                 <SortControl
                   sortBy={enrollSort.by}
